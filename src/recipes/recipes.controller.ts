@@ -14,6 +14,8 @@ import { RecipesService } from './recipes.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
+import { Delete } from '@nestjs/common';
+import { title } from 'process';
 
 @Controller('recipes')
 export class RecipesController {
@@ -28,6 +30,20 @@ export class RecipesController {
       recipes,
     };
   }
+  @Get(':id')
+async getRecipeById(
+  @Param('id') id: string,
+) {
+
+  const recipe = await this.recipesService.findOne(
+    Number(id),
+  );
+
+  return {
+    message: 'Get recipe detail success',
+    recipe,
+  };
+}
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -74,5 +90,25 @@ async updateRecipe(
     message: 'Update recipe success',
     recipe,
   };
+}
+@UseGuards(JwtAuthGuard)
+@Delete(':id')
+async deleteRecipe(
+  @Req() req: any,
+  @Param('id') id: string,
+) {
+
+  if (req.user.role !== 'ADMIN') {
+    throw new ForbiddenException(
+      'Only admin can delete recipe',
+    );
+  }
+
+  await this.recipesService.remove(Number(id));
+
+  return {
+  success: true,
+  message: 'Recipe has been deleted successfully',
+};
 }
 }

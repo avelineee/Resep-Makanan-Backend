@@ -23,4 +23,18 @@ async update(id: number, data: any) {
     data,
   });
 }
+async findOne(id: number) {
+  return this.prisma.recipe.findUnique({
+    where: {
+      id,
+    },
+  });
+}
+async remove(id: number) {
+  return this.prisma.recipe.delete({
+    where: {
+      id,
+    },
+  });
+}
 }
