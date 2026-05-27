@@ -7,6 +7,7 @@ import {
   Patch,
   Param,
   UseGuards,
+  
   ForbiddenException,
 } from '@nestjs/common';
 
@@ -16,33 +17,38 @@ import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { Delete } from '@nestjs/common';
 import { title } from 'process';
+import { CreateReviewDto } from './dto/create-review.dto';
+import { Query } from '@nestjs/common';
 
 @Controller('recipes')
 export class RecipesController {
   constructor(private recipesService: RecipesService) {}
 
   @Get()
-  async getAllRecipes() {
-    const recipes = await this.recipesService.findAll();
+async getAllRecipes(
+  @Query('search') search?: string,
 
-    return {
-      message: 'Get all recipes success',
-      recipes,
-    };
-  }
-  @Get(':id')
-async getRecipeById(
-  @Param('id') id: string,
+  @Query('category') category?: string,
 ) {
 
-  const recipe = await this.recipesService.findOne(
-    Number(id),
-  );
+  const recipes =
+    await this.recipesService.findAll(
+      search,
+      category,
+    );
 
   return {
-    message: 'Get recipe detail success',
-    recipe,
-  };
+  success: true,
+
+  message:
+    recipes.length > 0
+      ? 'Recipes retrieved successfully'
+      : 'No recipes found for this search or category',
+
+  totalRecipes: recipes.length,
+
+  recipes,
+};
 }
 
   @UseGuards(JwtAuthGuard)
@@ -111,4 +117,73 @@ async deleteRecipe(
   message: 'Recipe has been deleted successfully',
 };
 }
+
+@UseGuards(JwtAuthGuard)
+@Post(':id/reviews')
+async createReview(
+  @Req() req: any,
+
+  @Param('id') id: string,
+
+  @Body() dto: CreateReviewDto,
+) {
+
+  const review =
+    await this.recipesService.createReview(
+      req.user.id,
+      Number(id),
+      dto,
+    );
+
+  return {
+    success: true,
+
+    message:
+      'Review has been added successfully',
+
+    review,
+  };
+}
+@Get(':id/reviews')
+async getReviews(
+  @Param('id') id: string,
+) {
+
+  const reviews =
+    await this.recipesService.getReviews(
+      Number(id),
+    );
+
+  return {
+    success: true,
+
+    message:
+      'Recipe reviews retrieved successfully',
+
+    totalReviews: reviews.length,
+
+    reviews,
+  }; 
+}
+@UseGuards(JwtAuthGuard)
+@Delete(':id/reviews')
+async deleteReview(
+  @Req() req: any,
+
+  @Param('id') id: string,
+) {
+
+  await this.recipesService.deleteReview(
+    req.user.id,
+    Number(id),
+  );
+
+  return {
+    success: true,
+
+    message:
+      'Review has been deleted successfully',
+  };
+}
+
 }
