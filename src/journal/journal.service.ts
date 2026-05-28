@@ -179,24 +179,36 @@ async getShoppingList(userId: number) {
       },
     });
 
-  const ingredients =
-    journals.flatMap((journal) =>
-      journal.entries.flatMap(
-        (entry) =>
-          entry.recipe
-            ?.ingredientItems || [],
-      ),
-    );
+  const shoppingList: { name: string; amount: string | null }[] = [];
 
-  const shoppingList =
-    ingredients.map(
-      (ingredient) => ({
-        name: ingredient.name,
-
-        amount:
-          ingredient.amount,
-      }),
-    );
+  journals.forEach((journal) => {
+    journal.entries.forEach((entry) => {
+      const recipe = entry.recipe;
+      if (recipe && recipe.ingredients) {
+        try {
+          const ingredientsArr = JSON.parse(recipe.ingredients);
+          if (Array.isArray(ingredientsArr)) {
+            ingredientsArr.forEach((ing: any) => {
+              if (typeof ing === 'string') {
+                shoppingList.push({
+                  name: ing,
+                  amount: null,
+                });
+              } else if (typeof ing === 'object' && ing !== null) {
+                shoppingList.push({
+                  name: ing.name || 'Unknown',
+                  amount: ing.amount || null,
+                });
+              }
+            });
+          }
+        } catch (e) {
+          // Fallback if not JSON
+          shoppingList.push({ name: recipe.ingredients, amount: null });
+        }
+      }
+    });
+  });
 
   return shoppingList;
 }
