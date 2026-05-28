@@ -25,6 +25,7 @@ SwaggerModule.setup(
   document,
 );
 
+app.enableCors();
 await app.listen(process.env.PORT ?? 3000);
 
 }
