@@ -8,11 +8,11 @@ import { ForbiddenException } from '@nestjs/common';
 @Injectable()
 export class RecipesService {
   constructor(
-  private prisma: PrismaService,
+    private prisma: PrismaService,
 
-  private cloudinaryService:
-    CloudinaryService,
-) {}
+    private cloudinaryService:
+      CloudinaryService,
+  ) { }
 
   async findAll(
     search?: string,
@@ -44,6 +44,8 @@ export class RecipesService {
         ingredientItems: true,
 
         stepItems: true,
+
+         tags: true,
       },
       skip: (page - 1) * limit,
 
@@ -75,6 +77,16 @@ export class RecipesService {
         calories: data.calories,
 
         isPremium: data.isPremium,
+
+        ...(data.tags && {
+          tags: {
+            create: data.tags.map(
+              (tag: string) => ({
+                name: tag,
+              }),
+            ),
+          },
+        }),
 
         ingredients: JSON.stringify(
           data.ingredients,
@@ -115,6 +127,8 @@ export class RecipesService {
         ingredientItems: true,
 
         stepItems: true,
+
+          tags: true,
       },
     });
   }
@@ -196,11 +210,13 @@ export class RecipesService {
         ingredientItems: true,
 
         stepItems: true,
+
+          tags: true,
       },
     });
   }
 
-  async findOne(id: number, user?:any) {
+  async findOne(id: number, user?: any) {
 
     const recipe =
       await this.prisma.recipe.findUnique({
@@ -228,9 +244,13 @@ export class RecipesService {
 
           stepItems: true,
 
+           tags: true,
+
           categories: {
             include: {
               category: true,
+
+              
             },
           },
 
@@ -249,13 +269,13 @@ export class RecipesService {
       );
     }
     if (
-  recipe.isPremium &&
-  !user?.isPremium
-) {
-  throw new ForbiddenException(
-    'This recipe is for premium users only',
-  );
-}
+      recipe.isPremium &&
+      !user?.isPremium
+    ) {
+      throw new ForbiddenException(
+        'This recipe is for premium users only',
+      );
+    }
 
     return recipe;
   }

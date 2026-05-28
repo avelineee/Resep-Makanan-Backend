@@ -75,7 +75,8 @@ export class TransactionsService {
     );
   }
 
-  return this.prisma.transaction.update({
+  const updatedTransaction =
+  await this.prisma.transaction.update({
     where: {
       id,
     },
@@ -84,5 +85,39 @@ export class TransactionsService {
       status: 'SUCCESS',
     },
   });
+
+await this.prisma.userTutorialAccess.create({
+
+    data: {
+      userId:
+        transaction.userId,
+
+      tutorialId:
+        transaction.tutorialId,
+
+      transactionId:
+        transaction.id,
+    },
+  });
+
+  await this.prisma.activity.create({
+  data: {
+    userId:
+      transaction.userId,
+
+    type:
+      'TUTORIAL_PURCHASED',
+
+    metadata: {
+      tutorialId:
+        transaction.tutorialId,
+
+      transactionId:
+        transaction.id,
+    },
+  },
+});
+
+return updatedTransaction;
 }
 }

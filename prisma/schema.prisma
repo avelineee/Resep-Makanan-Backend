@@ -30,6 +30,8 @@ model User {
   journals Journal[]
   recipes Recipe[]
   transactions Transaction[]
+  tutorialAccesses UserTutorialAccess[]
+  activities Activity[]
 }
 
 enum Role {
@@ -62,6 +64,7 @@ model Recipe {
   ingredientItems Ingredient[]
   stepItems Step[]
   tutorial Tutorial?
+  tags RecipeTag[]
   
 
 author User? @relation(fields: [authorId], references: [id])
@@ -175,6 +178,7 @@ model Tutorial {
   updatedAt    DateTime @updatedAt
   recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   transactions Transaction[]
+  accesses UserTutorialAccess[]
 }
 
 model Transaction {
@@ -191,6 +195,7 @@ model Transaction {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   tutorial Tutorial @relation(fields: [tutorialId],references: [id],onDelete: Cascade)
+  access UserTutorialAccess?
 }
 
 enum TransactionStatus {
@@ -199,5 +204,49 @@ enum TransactionStatus {
   FAILED
 }
 
+model UserTutorialAccess {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  tutorialId    Int
+  transactionId Int      @unique
+  grantedAt     DateTime @default(now())
+  expiresAt     DateTime?
+
+  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+
+  tutorial Tutorial @relation(fields: [tutorialId],references: [id],onDelete: Cascade)
+
+  transaction Transaction @relation(fields: [transactionId],references: [id])
+
+  @@unique([userId, tutorialId])
+}
+
+model Activity {
+  id        Int          @id @default(autoincrement())
+  userId    Int
+  type      ActivityType
+  metadata  Json?
+  createdAt DateTime     @default(now())
+
+  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+}
+
+enum ActivityType {
+  RECIPE_SAVED
+  REVIEW_POSTED
+  TUTORIAL_PURCHASED
+}
+
+model RecipeTag {
+  id       Int    @id @default(autoincrement())
+
+  name     String
+
+  recipeId Int
+
+  recipe Recipe @relation(fields: [recipeId],references: [id],onDelete: Cascade)
+
+  @@unique([name, recipeId])
+}
 
 

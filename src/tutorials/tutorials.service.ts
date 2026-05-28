@@ -41,49 +41,29 @@ export class TutorialsService {
     });
   }
 
-  async findOne(id: number, user?: any) {
+  async findOne(id: number) {
 
-    const tutorial =
-  await this.prisma.tutorial.findUnique({
-    where: {
-      id,
-    },
+  const tutorial =
+    await this.prisma.tutorial.findUnique({
+      where: {
+        id,
+      },
 
-    include: {
-      recipe: true,
-    },
-  });
+      include: {
+        recipe: true,
+      },
+    });
 
-if (!tutorial) {
-  throw new NotFoundException(
-    'Tutorial not found',
-  );
-}
-
-const transaction =
-  await this.prisma.transaction.findFirst({
-    where: {
-      userId: user?.id,
-
-      tutorialId: tutorial.id,
-
-      status: 'SUCCESS',
-    },
-  });
-
-if (
-  tutorial.recipe.isPremium &&
-  (!user || !transaction)
-) {
-  throw new ForbiddenException(
-    'This tutorial is for premium users only',
-  );
-}
-
-return tutorial;
+  if (!tutorial) {
+    throw new NotFoundException(
+      'Tutorial not found',
+    );
   }
 
-  async watchTutorial(
+  return tutorial;
+}
+
+async watchTutorial(
   id: number,
   user: any,
 ) {
@@ -105,7 +85,24 @@ return tutorial;
     );
   }
 
-  
+  const access =
+    await this.prisma.userTutorialAccess
+      .findFirst({
+        where: {
+          userId: user.id,
+
+          tutorialId: tutorial.id,
+        },
+      });
+
+  if (
+    tutorial.recipe?.isPremium &&
+    !access
+  ) {
+    throw new ForbiddenException(
+      'You need to purchase this tutorial first',
+    );
+  }
 
   return tutorial;
 }
