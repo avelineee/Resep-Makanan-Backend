@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { JournalService } from './journal.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
-import { Body, Req, Post, Param, Get } from '@nestjs/common';
+import { Body, Req, Post, Param, Get, Delete } from '@nestjs/common';
 import { CreateJournalDto } from './dto/create-journal.dto';
 import { CreateEntryDto } from './dto/create-entry.dto';
 
@@ -79,6 +79,46 @@ async getMyJournals(
     totalJournals: journals.length,
 
     journals,
+  };
+}
+@UseGuards(JwtAuthGuard)
+@Delete('entries/:entryId')
+async deleteEntry(
+  @Req() req: any,
+
+  @Param('entryId') entryId: string,
+) {
+
+  await this.journalService.deleteEntry(
+    req.user.id,
+    Number(entryId),
+  );
+
+  return {
+    success: true,
+
+    message:
+      'Journal entry has been deleted successfully',
+  };
+}
+@UseGuards(JwtAuthGuard)
+@Get('shopping-list')
+async getShoppingList(
+  @Req() req: any,
+) {
+
+  const shoppingList =
+    await this.journalService.getShoppingList(
+      req.user.id,
+    );
+
+  return {
+    success: true,
+
+    totalItems:
+      shoppingList.length,
+
+    shoppingList,
   };
 }
 }

@@ -4,178 +4,380 @@ import { BadRequestException, NotFoundException, } from '@nestjs/common';
 
 @Injectable()
 export class RecipesService {
-    constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) { }
 
-    async findAll(
-  search?: string,
-  category?: string,
-) {
+  async findAll(
+    search?: string,
+    category?: string,
+    page = 1,
+    limit = 10,
+  ) {
 
-  return this.prisma.recipe.findMany({
-    where: {
-      AND: [
-        search
-          ? {
+    return this.prisma.recipe.findMany({
+      where: {
+        AND: [
+          search
+            ? {
               title: {
                 contains: search,
               },
             }
-          : {},
+            : {},
 
-        category
-          ? {
+          category
+            ? {
               category,
             }
-          : {},
-      ],
-    },
+            : {},
+        ],
+      },
 
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-}
-    async create(data: any) {
-  return this.prisma.recipe.create({
-    data,
-  });
-}
-async update(id: number, data: any) {
-  return this.prisma.recipe.update({
-    where: {
-      id,
-    },
+      include: {
+        ingredientItems: true,
 
-    data,
-  });
-}
-async findOne(id: number) {
-  return this.prisma.recipe.findUnique({
-    where: {
-      id,
-    },
-  });
-}
-async remove(id: number) {
-  return this.prisma.recipe.delete({
-    where: {
-      id,
-    },
-  });
-}
-async createReview(
-  userId: number,
-  recipeId: number,
-  data: any,
-) {
+        stepItems: true,
+      },
+      skip: (page - 1) * limit,
 
-  const recipe =
-    await this.prisma.recipe.findUnique({
-      where: {
-        id: recipeId,
+      take: limit,
+
+      orderBy: {
+        createdAt: 'desc',
       },
     });
-
-  if (!recipe) {
-    throw new NotFoundException(
-      'Recipe not found',
-    );
   }
+  async create(data: any) {
 
-  const existingReview =
-    await this.prisma.review.findUnique({
-      where: {
-        userId_recipeId: {
-          userId,
-          recipeId,
-        },
-      },
-    });
-
-  if (existingReview) {
-    throw new BadRequestException(
-      'You have already reviewed this recipe',
-    );
-  }
-
-  const review =
-    await this.prisma.review.create({
+    return this.prisma.recipe.create({
       data: {
-        userId,
-        recipeId,
-        ...data,
+        title: data.title,
+
+        description: data.description,
+
+        imageUrl: data.imageUrl,
+
+        category: data.category,
+
+        prepTime: data.prepTime,
+
+        cookTime: data.cookTime,
+
+        servings: data.servings,
+
+        calories: data.calories,
+
+        isPremium: data.isPremium,
+
+        ingredients: JSON.stringify(
+          data.ingredients,
+        ),
+
+        steps: JSON.stringify(
+          data.steps,
+        ),
+
+        ...(data.categoryIds && {
+          categories: {
+            create: data.categoryIds.map(
+              (categoryId: number) => ({
+                categoryId,
+              }),
+            ),
+          },
+        }),
+
+        ingredientItems: {
+          create: data.ingredients,
+        },
+
+        stepItems: {
+          create: data.steps.map(
+            (step: any) => ({
+              stepNumber:
+                step.stepNumber,
+
+              description:
+                step.description,
+            }),
+          ),
+        },
+      },
+
+      include: {
+        ingredientItems: true,
+
+        stepItems: true,
       },
     });
+  }
 
-  const reviews =
-    await this.prisma.review.findMany({
+  async update(id: number, data: any) {
+
+    const recipe =
+      await this.prisma.recipe.findUnique({
+        where: {
+          id,
+        },
+      });
+
+    if (!recipe) {
+      throw new NotFoundException(
+        'Recipe not found',
+      );
+    }
+
+
+    return this.prisma.recipe.update({
       where: {
-        recipeId,
+        id,
+      },
+
+      data: {
+        title: data.title,
+
+        description: data.description,
+
+        imageUrl: data.imageUrl,
+
+        category: data.category,
+
+        prepTime: data.prepTime,
+
+        cookTime: data.cookTime,
+
+        servings: data.servings,
+
+        calories: data.calories,
+
+        isPremium: data.isPremium,
+
+        ingredients: JSON.stringify(
+          data.ingredients,
+        ),
+
+        steps: JSON.stringify(
+          data.steps,
+        ),
+
+        ...(data.ingredients && {
+          ingredientItems: {
+            deleteMany: {},
+
+            create: data.ingredients,
+          },
+        }),
+
+        ...(data.steps && {
+          stepItems: {
+            deleteMany: {},
+
+            create: data.steps.map(
+              (step: any) => ({
+                stepNumber:
+                  step.stepNumber,
+
+                description:
+                  step.description,
+              }),
+            ),
+          },
+        }),
+      },
+
+      include: {
+        ingredientItems: true,
+
+        stepItems: true,
       },
     });
+  }
 
-  const totalRating =
-    reviews.reduce(
-      (sum, review) => sum + review.rating,
-      0,
-    );
+  async findOne(id: number) {
 
-  const averageRating =
-    totalRating / reviews.length;
+    const recipe =
+      await this.prisma.recipe.findUnique({
+        where: {
+          id,
+        },
 
-  await this.prisma.recipe.update({
-    where: {
-      id: recipeId,
-    },
+        include: {
+          reviews: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                },
+              },
+            },
 
-    data: {
-      rating: averageRating,
-    },
-  });
+            orderBy: {
+              createdAt: 'desc',
+            },
+          },
 
-  return review;
-}
-async getReviews(recipeId: number) {
+          ingredientItems: true,
 
-  const recipe =
-    await this.prisma.recipe.findUnique({
+          stepItems: true,
+
+          categories: {
+            include: {
+              category: true,
+            },
+          },
+
+          _count: {
+            select: {
+              favorites: true,
+              reviews: true,
+            },
+          },
+        },
+      });
+
+    if (!recipe) {
+      throw new NotFoundException(
+        'Recipe not found',
+      );
+    }
+
+    return recipe;
+  }
+  async remove(id: number) {
+    return this.prisma.recipe.delete({
+      where: {
+        id,
+      },
+    });
+  }
+  async createReview(
+    userId: number,
+    recipeId: number,
+    data: any,
+  ) {
+
+    const recipe =
+      await this.prisma.recipe.findUnique({
+        where: {
+          id: recipeId,
+        },
+      });
+
+    if (!recipe) {
+      throw new NotFoundException(
+        'Recipe not found',
+      );
+    }
+
+    const existingReview =
+      await this.prisma.review.findUnique({
+        where: {
+          userId_recipeId: {
+            userId,
+            recipeId,
+          },
+        },
+      });
+
+    if (existingReview) {
+      throw new BadRequestException(
+        'You have already reviewed this recipe',
+      );
+    }
+
+    const review =
+      await this.prisma.review.create({
+        data: {
+          userId,
+          recipeId,
+          ...data,
+        },
+      });
+
+    const reviews =
+      await this.prisma.review.findMany({
+        where: {
+          recipeId,
+        },
+      });
+
+    const totalRating =
+      reviews.reduce(
+        (sum, review) => sum + review.rating,
+        0,
+      );
+
+    const averageRating =
+      totalRating / reviews.length;
+
+    await this.prisma.recipe.update({
       where: {
         id: recipeId,
       },
+
+      data: {
+        rating: averageRating,
+      },
     });
 
-  if (!recipe) {
-    throw new NotFoundException(
-      'Recipe not found',
-    );
+    return review;
   }
+  async getReviews(recipeId: number) {
 
-  return this.prisma.review.findMany({
-    where: {
-      recipeId,
-    },
+    const recipe =
+      await this.prisma.recipe.findUnique({
+        where: {
+          id: recipeId,
+        },
+      });
 
-    include: {
-      user: {
-        select: {
-          id: true,
-          username: true,
-          email: true,
+    if (!recipe) {
+      throw new NotFoundException(
+        'Recipe not found',
+      );
+    }
+
+    return this.prisma.review.findMany({
+      where: {
+        recipeId,
+      },
+
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+          },
         },
       },
-    },
 
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-}
-async deleteReview (
-  userId: number,
-  recipeId: number,
-) {
-  const review =
-    await this.prisma.review.findUnique({
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+  async deleteReview(
+    userId: number,
+    recipeId: number,
+  ) {
+    const review =
+      await this.prisma.review.findUnique({
+        where: {
+          userId_recipeId: {
+            userId,
+            recipeId,
+          },
+        },
+      });
+
+    if (!review) {
+      throw new NotFoundException(
+        'Review not found',
+      );
+    }
+
+    await this.prisma.review.delete({
       where: {
         userId_recipeId: {
           userId,
@@ -184,47 +386,69 @@ async deleteReview (
       },
     });
 
-  if (!review) {
-    throw new NotFoundException(
-      'Review not found',
-    );
-  }
+    const reviews =
+      await this.prisma.review.findMany({
+        where: {
+          recipeId,
+        },
+      });
 
-  await this.prisma.review.delete({
-    where: {
-      userId_recipeId: {
-        userId,
-        recipeId,
-      },
-    },
-  });
-
-  const reviews =
-    await this.prisma.review.findMany({
-      where: {
-        recipeId,
-      },
-    });
-
-  const averageRating =
-    reviews.length > 0
-      ? reviews.reduce(
+    const averageRating =
+      reviews.length > 0
+        ? reviews.reduce(
           (sum, review) =>
             sum + review.rating,
           0,
         ) / reviews.length
-      : 0;
+        : 0;
 
-  await this.prisma.recipe.update({
-    where: {
-      id: recipeId,
-    },
+    await this.prisma.recipe.update({
+      where: {
+        id: recipeId,
+      },
 
-    data: {
-      rating: averageRating,
-    },
-  });
-}
+      data: {
+        rating: averageRating,
+      },
+    });
+  }
 
+  async getTrendingRecipes() {
+
+    return this.prisma.recipe.findMany({
+      select: {
+        id: true,
+
+        title: true,
+
+        imageUrl: true,
+
+        category: true,
+
+        rating: true,
+
+        _count: {
+          select: {
+            favorites: true,
+            reviews: true,
+          },
+        },
+      },
+
+      orderBy: [
+        {
+          rating: 'desc',
+        },
+
+        {
+          favorites: {
+            _count: 'desc',
+          },
+        },
+      ],
+
+      take: 10,
+    });
+  }
 
 }

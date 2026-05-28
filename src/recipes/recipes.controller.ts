@@ -20,6 +20,7 @@ import { title } from 'process';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { Query } from '@nestjs/common';
 
+
 @Controller('recipes')
 export class RecipesController {
   constructor(private recipesService: RecipesService) {}
@@ -28,13 +29,19 @@ export class RecipesController {
 async getAllRecipes(
   @Query('search') search?: string,
 
-  @Query('category') category?: string,
+@Query('category') category?: string,
+
+@Query('page') page = '1',
+
+@Query('limit') limit = '10',
 ) {
 
   const recipes =
     await this.recipesService.findAll(
       search,
       category,
+      Number(page),
+      Number(limit)
     );
 
   return {
@@ -183,6 +190,44 @@ async deleteReview(
 
     message:
       'Review has been deleted successfully',
+  };
+}
+@Get('trending')
+async getTrendingRecipes() {
+
+  const recipes =
+    await this.recipesService.getTrendingRecipes();
+
+  return {
+    success: true,
+
+    message:
+      recipes.length > 0
+        ? 'Trending recipes retrieved successfully'
+        : 'No trending recipes available',
+
+    totalRecipes: recipes.length,
+
+    recipes,
+  };
+}
+@Get(':id')
+async getRecipeDetail(
+  @Param('id') id: string,
+) {
+
+  const recipe =
+    await this.recipesService.findOne(
+      Number(id),
+    );
+
+  return {
+    success: true,
+
+    message:
+      'Recipe detail retrieved successfully',
+
+    recipe,
   };
 }
 

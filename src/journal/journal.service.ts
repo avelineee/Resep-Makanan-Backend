@@ -122,4 +122,83 @@ async getMyJournals(userId: number) {
     },
   });
 }
+async deleteEntry(
+  userId: number,
+  entryId: number,
+) {
+
+  const entry =
+    await this.prisma.journalEntry.findUnique({
+      where: {
+        id: entryId,
+      },
+
+      include: {
+        journal: true,
+      },
+    });
+
+  if (!entry) {
+    throw new NotFoundException(
+      'Journal entry not found',
+    );
+  }
+
+  if (entry.journal.userId !== userId) {
+    throw new BadRequestException(
+      'You are not allowed to delete this journal entry',
+    );
+  }
+
+  await this.prisma.journalEntry.delete({
+    where: {
+      id: entryId,
+    },
+  });
+
+  return;
 }
+async getShoppingList(userId: number) {
+
+  const journals =
+    await this.prisma.journal.findMany({
+      where: {
+        userId,
+      },
+
+      include: {
+        entries: {
+          include: {
+            recipe: {
+              include: {
+                ingredientItems: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+  const ingredients =
+    journals.flatMap((journal) =>
+      journal.entries.flatMap(
+        (entry) =>
+          entry.recipe
+            ?.ingredientItems || [],
+      ),
+    );
+
+  const shoppingList =
+    ingredients.map(
+      (ingredient) => ({
+        name: ingredient.name,
+
+        amount:
+          ingredient.amount,
+      }),
+    );
+
+  return shoppingList;
+}
+}
+

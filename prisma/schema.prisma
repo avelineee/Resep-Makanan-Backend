@@ -25,6 +25,7 @@ model User {
   favorites  Favorite[] 
   reviews Review[]
   journals Journal[]
+  recipes Recipe[]
 }
 
 enum Role {
@@ -51,6 +52,12 @@ model Recipe {
   favorites Favorite[]
   reviews Review[]
   journals    JournalEntry[]
+  authorId Int?
+  categories RecipeCategory[]
+  ingredientItems Ingredient[]
+  stepItems Step[]
+
+author User? @relation(fields: [authorId], references: [id])
 }
 
 model Favorite {
@@ -107,3 +114,41 @@ enum MealType {
   DINNER
 }
 
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  recipes     RecipeCategory[]
+}
+
+model RecipeCategory {
+  recipeId   Int
+  categoryId Int
+
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([recipeId, categoryId])
+}
+
+model Ingredient {
+  id        Int    @id @default(autoincrement())
+  name      String
+  amount    String?
+  recipeId  Int
+  recipe    Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+}
+
+model Step {
+  id           Int    @id @default(autoincrement())
+  stepNumber   Int
+  description  String
+  recipeId     Int
+  recipe       Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+}
+
+model Newsletter {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
