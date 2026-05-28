@@ -8,9 +8,11 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
+
 
 model User {
   id        Int     @id @default(autoincrement())
@@ -22,10 +24,12 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   favorites  Favorite[] 
   reviews Review[]
   journals Journal[]
   recipes Recipe[]
+  transactions Transaction[]
 }
 
 enum Role {
@@ -43,12 +47,19 @@ model Recipe {
   cookTime String
   servings Int
   calories Int
+<<<<<<< HEAD
   ingredients String @db.Text
   steps       String @db.Text
+=======
+  ingredients String
+  steps       String
+  
+>>>>>>> c9dfc7a (add prisma migration)
   rating Float @default(0)
   isPremium Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   favorites Favorite[]
   reviews Review[]
   journals    JournalEntry[]
@@ -56,6 +67,8 @@ model Recipe {
   categories RecipeCategory[]
   ingredientItems Ingredient[]
   stepItems Step[]
+  tutorial Tutorial?
+  
 
 author User? @relation(fields: [authorId], references: [id])
 }
@@ -152,3 +165,45 @@ model Newsletter {
   email     String   @unique
   createdAt DateTime @default(now())
 }
+
+model Tutorial {
+  id           Int      @id @default(autoincrement())
+  recipeId     Int      @unique
+  title        String
+  description  String
+  videoUrl     String
+  thumbnailUrl String?
+  duration     Int
+  price        Int
+
+  isPublished  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+}
+
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  tutorialId Int
+  amount    Int
+
+  status    TransactionStatus @default(PENDING)
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tutorial Tutorial @relation(fields: [tutorialId],references: [id],onDelete: Cascade)
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+
+

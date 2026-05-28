@@ -7,7 +7,7 @@ import {
   Patch,
   Param,
   UseGuards,
-  
+
   ForbiddenException,
 } from '@nestjs/common';
 
@@ -19,44 +19,54 @@ import { Delete } from '@nestjs/common';
 import { title } from 'process';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { Query } from '@nestjs/common';
+import { UploadedFile, UseInterceptors, } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { AnyNaptrRecord } from 'dns';
 
 
 @Controller('recipes')
 export class RecipesController {
-  constructor(private recipesService: RecipesService) {}
+  constructor(
+    private recipesService:
+      RecipesService,
+
+    private cloudinaryService:
+      CloudinaryService,
+  ) { }
 
   @Get()
-async getAllRecipes(
-  @Query('search') search?: string,
+  async getAllRecipes(
+    @Query('search') search?: string,
 
-@Query('category') category?: string,
+    @Query('category') category?: string,
 
-@Query('page') page = '1',
+    @Query('page') page = '1',
 
-@Query('limit') limit = '10',
-) {
+    @Query('limit') limit = '10',
+  ) {
 
-  const recipes =
-    await this.recipesService.findAll(
-      search,
-      category,
-      Number(page),
-      Number(limit)
-    );
+    const recipes =
+      await this.recipesService.findAll(
+        search,
+        category,
+        Number(page),
+        Number(limit)
+      );
 
-  return {
-  success: true,
+    return {
+      success: true,
 
-  message:
-    recipes.length > 0
-      ? 'Recipes retrieved successfully'
-      : 'No recipes found for this search or category',
+      message:
+        recipes.length > 0
+          ? 'Recipes retrieved successfully'
+          : 'No recipes found for this search or category',
 
-  totalRecipes: recipes.length,
+      totalRecipes: recipes.length,
 
-  recipes,
-};
-}
+      recipes,
+    };
+  }
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -79,156 +89,184 @@ async getAllRecipes(
     };
   }
   @UseGuards(JwtAuthGuard)
-@Patch(':id')
-async updateRecipe(
-  @Req() req: any,
+  @Patch(':id')
+  async updateRecipe(
+    @Req() req: any,
 
-  @Param('id') id: string,
+    @Param('id') id: string,
 
-  @Body() dto: UpdateRecipeDto,
-) {
+    @Body() dto: UpdateRecipeDto,
+  ) {
 
-  if (req.user.role !== 'ADMIN') {
-    throw new ForbiddenException(
-      'Only admin can update recipe',
-    );
-  }
+    if (req.user.role !== 'ADMIN') {
+      throw new ForbiddenException(
+        'Only admin can update recipe',
+      );
+    }
 
-  const recipe = await this.recipesService.update(
-    Number(id),
-    dto,
-  );
-
-  return {
-    message: 'Update recipe success',
-    recipe,
-  };
-}
-@UseGuards(JwtAuthGuard)
-@Delete(':id')
-async deleteRecipe(
-  @Req() req: any,
-  @Param('id') id: string,
-) {
-
-  if (req.user.role !== 'ADMIN') {
-    throw new ForbiddenException(
-      'Only admin can delete recipe',
-    );
-  }
-
-  await this.recipesService.remove(Number(id));
-
-  return {
-  success: true,
-  message: 'Recipe has been deleted successfully',
-};
-}
-
-@UseGuards(JwtAuthGuard)
-@Post(':id/reviews')
-async createReview(
-  @Req() req: any,
-
-  @Param('id') id: string,
-
-  @Body() dto: CreateReviewDto,
-) {
-
-  const review =
-    await this.recipesService.createReview(
-      req.user.id,
+    const recipe = await this.recipesService.update(
       Number(id),
       dto,
     );
 
-  return {
-    success: true,
+    return {
+      message: 'Update recipe success',
+      recipe,
+    };
+  }
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async deleteRecipe(
+    @Req() req: any,
+    @Param('id') id: string,
+  ) {
 
-    message:
-      'Review has been added successfully',
+    if (req.user.role !== 'ADMIN') {
+      throw new ForbiddenException(
+        'Only admin can delete recipe',
+      );
+    }
 
-    review,
-  };
-}
-@Get(':id/reviews')
-async getReviews(
-  @Param('id') id: string,
-) {
+    await this.recipesService.remove(Number(id));
 
-  const reviews =
-    await this.recipesService.getReviews(
+    return {
+      success: true,
+      message: 'Recipe has been deleted successfully',
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/reviews')
+  async createReview(
+    @Req() req: any,
+
+    @Param('id') id: string,
+
+    @Body() dto: CreateReviewDto,
+  ) {
+
+    const review =
+      await this.recipesService.createReview(
+        req.user.id,
+        Number(id),
+        dto,
+      );
+
+    return {
+      success: true,
+
+      message:
+        'Review has been added successfully',
+
+      review,
+    };
+  }
+  @Get(':id/reviews')
+  async getReviews(
+    @Param('id') id: string,
+  ) {
+
+    const reviews =
+      await this.recipesService.getReviews(
+        Number(id),
+      );
+
+    return {
+      success: true,
+
+      message:
+        'Recipe reviews retrieved successfully',
+
+      totalReviews: reviews.length,
+
+      reviews,
+    };
+  }
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id/reviews')
+  async deleteReview(
+    @Req() req: any,
+
+    @Param('id') id: string,
+  ) {
+
+    await this.recipesService.deleteReview(
+      req.user.id,
       Number(id),
     );
 
-  return {
-    success: true,
+    return {
+      success: true,
 
-    message:
-      'Recipe reviews retrieved successfully',
+      message:
+        'Review has been deleted successfully',
+    };
+  }
+  @Get('trending')
+  async getTrendingRecipes() {
 
-    totalReviews: reviews.length,
+    const recipes =
+      await this.recipesService.getTrendingRecipes();
 
-    reviews,
-  }; 
-}
-@UseGuards(JwtAuthGuard)
-@Delete(':id/reviews')
-async deleteReview(
-  @Req() req: any,
+    return {
+      success: true,
 
-  @Param('id') id: string,
-) {
+      message:
+        recipes.length > 0
+          ? 'Trending recipes retrieved successfully'
+          : 'No trending recipes available',
 
-  await this.recipesService.deleteReview(
-    req.user.id,
-    Number(id),
-  );
+      totalRecipes: recipes.length,
 
-  return {
-    success: true,
+      recipes,
+    };
+  }
 
-    message:
-      'Review has been deleted successfully',
-  };
-}
-@Get('trending')
-async getTrendingRecipes() {
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async getRecipeDetail(
+    @Param('id') id: string,
+    @Req() req: any,
+  ) {
 
-  const recipes =
-    await this.recipesService.getTrendingRecipes();
+    const recipe =
+      await this.recipesService.findOne(
+        Number(id),
+        req.user,
+      );
 
-  return {
-    success: true,
+    return {
+      success: true,
 
-    message:
-      recipes.length > 0
-        ? 'Trending recipes retrieved successfully'
-        : 'No trending recipes available',
+      message:
+        'Recipe detail retrieved successfully',
 
-    totalRecipes: recipes.length,
+      recipe,
+    };
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('upload')
+  @UseInterceptors(
+    FileInterceptor('image'),
+  )
+  async uploadRecipeImage(
+    @UploadedFile()
+    file: any
+  ) {
 
-    recipes,
-  };
-}
-@Get(':id')
-async getRecipeDetail(
-  @Param('id') id: string,
-) {
+    const uploadedImage: any =
+      await this.cloudinaryService
+        .uploadImage(file);
 
-  const recipe =
-    await this.recipesService.findOne(
-      Number(id),
-    );
+    return {
+      success: true,
 
-  return {
-    success: true,
+      message:
+        'Image uploaded successfully',
 
-    message:
-      'Recipe detail retrieved successfully',
-
-    recipe,
-  };
-}
+      imageUrl:
+        uploadedImage.secure_url,
+    };
+  }
 
 }

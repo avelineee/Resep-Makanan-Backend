@@ -10,9 +10,11 @@ import { CategoriesModule } from './categories/categories.module';
 import { NewsletterModule } from './newsletter/newsletter.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { TutorialsModule } from './tutorials/tutorials.module';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, PrismaModule, RecipesModule, JournalModule, CategoriesModule, NewsletterModule, DashboardModule, CloudinaryModule],
+  imports: [AuthModule, UsersModule, PrismaModule, RecipesModule, JournalModule, CategoriesModule, NewsletterModule, DashboardModule, CloudinaryModule, TutorialsModule, TransactionsModule],
   controllers: [AppController],
   providers: [AppService],
 })
