@@ -1,10 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BadRequestException, NotFoundException, } from '@nestjs/common';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { ForbiddenException } from '@nestjs/common';
+
 
 @Injectable()
 export class RecipesService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+  private prisma: PrismaService,
+
+  private cloudinaryService:
+    CloudinaryService,
+) {}
 
   async findAll(
     search?: string,
@@ -192,7 +200,7 @@ export class RecipesService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, user?:any) {
 
     const recipe =
       await this.prisma.recipe.findUnique({
@@ -240,6 +248,14 @@ export class RecipesService {
         'Recipe not found',
       );
     }
+    if (
+  recipe.isPremium &&
+  !user?.isPremium
+) {
+  throw new ForbiddenException(
+    'This recipe is for premium users only',
+  );
+}
 
     return recipe;
   }
@@ -450,5 +466,4 @@ export class RecipesService {
       take: 10,
     });
   }
-
 }
