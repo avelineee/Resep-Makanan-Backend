@@ -36,15 +36,15 @@ enum Role {
 model Recipe {
   id Int @id @default(autoincrement())
   title       String
-  description String
+  description String @db.Text
   imageUrl String?
   category String
   prepTime String
   cookTime String
   servings Int
   calories Int
-  ingredients String
-  steps       String
+  ingredients String @db.Text
+  steps       String @db.Text
   rating Float @default(0)
   isPremium Boolean @default(false)
   createdAt DateTime @default(now())
