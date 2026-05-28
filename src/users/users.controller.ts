@@ -81,9 +81,20 @@ async removeFavorite(
   );
 
   return {
-  success: true,
-  message:
-    'Recipe has been removed from favorites successfully',
-};
+    success: true,
+    message: 'Recipe has been removed from favorites successfully',
+  };
 }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me/reviews')
+  async getReviews(@Req() req: any) {
+    const reviews = await this.usersService.getReviews(req.user.id);
+    return {
+      success: true,
+      message: 'Reviews retrieved successfully',
+      totalReviews: reviews.length,
+      reviews,
+    };
+  }
 }

@@ -86,18 +86,25 @@ async getFavorites(userId: number) {
     },
   });
 }
-async removeFavorite(
-  userId: number,
-  recipeId: number,
-) {
-
-  return this.prisma.favorite.delete({
-    where: {
-      userId_recipeId: {
-        userId,
-        recipeId,
+  async removeFavorite(
+    userId: number,
+    recipeId: number,
+  ) {
+    return this.prisma.favorite.delete({
+      where: {
+        userId_recipeId: {
+          userId,
+          recipeId,
+        },
       },
-    },
-  });
-}
+    });
+  }
+
+  async getReviews(userId: number) {
+    return this.prisma.review.findMany({
+      where: { userId },
+      include: { recipe: true },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
 }
