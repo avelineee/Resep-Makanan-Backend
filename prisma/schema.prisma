@@ -47,14 +47,8 @@ model Recipe {
   cookTime String
   servings Int
   calories Int
-<<<<<<< HEAD
-  ingredients String @db.Text
-  steps       String @db.Text
-=======
   ingredients String
   steps       String
-  
->>>>>>> c9dfc7a (add prisma migration)
   rating Float @default(0)
   isPremium Boolean @default(false)
   createdAt DateTime @default(now())
