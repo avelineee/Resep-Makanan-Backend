@@ -46,6 +46,20 @@ export class RecipesService {
         stepItems: true,
 
          tags: true,
+
+        _count: {
+          select: {
+            favorites: true,
+            reviews: true,
+          },
+        },
+
+        author: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
       },
       skip: (page - 1) * limit,
 
