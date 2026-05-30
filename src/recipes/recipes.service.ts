@@ -284,7 +284,8 @@ export class RecipesService {
     }
     if (
       recipe.isPremium &&
-      !user?.isPremium
+      !user?.isPremium &&
+      user?.role !== 'ADMIN'
     ) {
       throw new ForbiddenException(
         'This recipe is for premium users only',
