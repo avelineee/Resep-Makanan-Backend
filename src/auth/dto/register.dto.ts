@@ -10,6 +10,6 @@ export class RegisterDto {
   @MinLength(6)
   password!: string;
 
-  @IsIn(['ADMIN', 'CUSTOMER'])
+  @IsIn(['ADMIN', 'USER'])
   role!: string;
 }
