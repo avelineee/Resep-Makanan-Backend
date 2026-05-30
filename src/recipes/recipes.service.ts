@@ -528,4 +528,18 @@ export class RecipesService {
       take: 10,
     });
   }
+  async getTags() {
+    const tags = await this.prisma.recipeTag.groupBy({
+      by: ['name'],
+      _count: {
+        recipeId: true,
+      },
+      orderBy: {
+        _count: {
+          recipeId: 'desc',
+        },
+      },
+    });
+    return tags.map(t => ({ name: t.name, count: t._count.recipeId }));
+  }
 }

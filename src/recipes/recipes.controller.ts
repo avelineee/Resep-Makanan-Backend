@@ -244,6 +244,15 @@ export class RecipesController {
     };
   }
 
+  @Get('tags')
+  async getTags() {
+    const tags = await this.recipesService.getTags();
+    return {
+      success: true,
+      tags,
+    };
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getRecipeDetail(
