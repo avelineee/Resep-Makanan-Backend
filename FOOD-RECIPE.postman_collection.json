@@ -1075,6 +1075,219 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Recently Added Endpoints",
+      "item": [
+        {
+          "name": "GET /journals/shopping-list",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/journals/shopping-list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "journals",
+                "shopping-list"
+              ]
+            },
+            "body": null
+          },
+          "response": []
+        },
+        {
+          "name": "GET /transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transactions"
+              ]
+            },
+            "body": null
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /recipes/:id/verify",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/recipes/:id/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes",
+                ":id",
+                "verify"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /recipes/tags",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/recipes/tags",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes",
+                "tags"
+              ]
+            },
+            "body": null
+          },
+          "response": []
+        },
+        {
+          "name": "GET /users/me/reviews",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "reviews"
+              ]
+            },
+            "body": null
+          },
+          "response": []
+        },
+        {
+          "name": "GET /tutorials",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tutorials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tutorials"
+              ]
+            },
+            "body": null
+          },
+          "response": []
+        },
+        {
+          "name": "GET /tutorials/:id/watch",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tutorials/:id/watch",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tutorials",
+                ":id",
+                "watch"
+              ]
+            },
+            "body": null
+          },
+          "response": []
+        },
+        {
+          "name": "GET /newsletter",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/newsletter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "newsletter"
+              ]
+            },
+            "body": null
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }
