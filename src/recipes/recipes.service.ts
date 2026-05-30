@@ -225,6 +225,17 @@ export class RecipesService {
             ),
           },
         }),
+
+        ...(data.tags && {
+          tags: {
+            deleteMany: {},
+            create: data.tags.map(
+              (tag: string) => ({
+                name: tag,
+              }),
+            ),
+          },
+        }),
       },
 
       include: {
