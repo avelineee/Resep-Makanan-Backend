@@ -95,8 +95,6 @@ export class RecipesService {
 
         calories: data.calories,
 
-        isPremium: data.isPremium,
-
         status: data.status || 'PENDING',
 
         ...(data.tags && {
@@ -191,8 +189,6 @@ export class RecipesService {
         servings: data.servings,
 
         calories: data.calories,
-
-        isPremium: data.isPremium,
 
         ingredients: JSON.stringify(
           data.ingredients,
@@ -309,16 +305,6 @@ export class RecipesService {
         'Recipe not found',
       );
     }
-    if (
-      recipe.isPremium &&
-      !user?.isPremium &&
-      user?.role !== 'ADMIN'
-    ) {
-      throw new ForbiddenException(
-        'This recipe is for premium users only',
-      );
-    }
-
     return recipe;
   }
   async remove(id: number) {

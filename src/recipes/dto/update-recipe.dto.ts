@@ -45,7 +45,4 @@ export class UpdateRecipeDto {
   @IsString()
   steps?: string;
 
-  @IsOptional()
-  @IsBoolean()
-  isPremium?: boolean;
 }

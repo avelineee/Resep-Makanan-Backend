@@ -29,7 +29,6 @@ export class UsersService {
       username: true,
       email: true,
       role: true,
-      isPremium: true,
       createdAt: true,
     },
   });

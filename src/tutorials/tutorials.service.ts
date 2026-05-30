@@ -96,8 +96,8 @@ async watchTutorial(
       });
 
   if (
-    tutorial.recipe?.isPremium &&
-    !access
+    !access &&
+    user?.role !== 'ADMIN'
   ) {
     throw new ForbiddenException(
       'You need to purchase this tutorial first',

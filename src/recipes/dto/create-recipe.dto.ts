@@ -62,10 +62,6 @@ export class CreateRecipeDto {
   steps!: StepDto[];
 
   @IsOptional()
-  @IsBoolean()
-  isPremium?: boolean;
-
-  @IsOptional()
   @IsArray()
   @IsInt({ each: true })
   categoryIds?: number[];
