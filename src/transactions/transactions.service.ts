@@ -50,9 +50,35 @@ export class TransactionsService {
       },
 
       include: {
-        tutorial: true,
+        tutorial: {
+          include: {
+            recipe: true
+          }
+        }
       },
 
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  async findAllTransactions() {
+    return this.prisma.transaction.findMany({
+      include: {
+        tutorial: {
+          include: {
+            recipe: true
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            username: true,
+            email: true
+          }
+        }
+      },
       orderBy: {
         createdAt: 'desc',
       },

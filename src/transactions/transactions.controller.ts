@@ -66,6 +66,27 @@ export class TransactionsController {
       transactions,
     };
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  async getAllTransactions(
+    @Req() req: any,
+  ) {
+    if (req.user.role !== 'ADMIN') {
+      throw new ForbiddenException(
+        'Only admin can view all transactions',
+      );
+    }
+
+    const transactions =
+      await this.transactionsService.findAllTransactions();
+
+    return {
+      success: true,
+      totalTransactions: transactions.length,
+      transactions,
+    };
+  }
   @UseGuards(JwtAuthGuard)
 @Patch(':id/verify')
 async verifyTransaction(
