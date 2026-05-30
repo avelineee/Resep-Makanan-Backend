@@ -19,6 +19,7 @@ export class RecipesService {
     category?: string,
     page = 1,
     limit = 10,
+    status?: string,
   ) {
 
     return this.prisma.recipe.findMany({
@@ -37,6 +38,10 @@ export class RecipesService {
               category,
             }
             : {},
+
+          status === 'ALL' 
+            ? {} 
+            : { status: (status as any) || 'APPROVED' }
         ],
       },
 
@@ -91,6 +96,8 @@ export class RecipesService {
         calories: data.calories,
 
         isPremium: data.isPremium,
+
+        status: data.status || 'PENDING',
 
         ...(data.tags && {
           tags: {
@@ -227,6 +234,15 @@ export class RecipesService {
 
           tags: true,
       },
+    });
+  }
+
+  async verifyRecipe(id: number, status: string) {
+    const recipe = await this.prisma.recipe.findUnique({ where: { id } });
+    if (!recipe) throw new NotFoundException('Recipe not found');
+    return this.prisma.recipe.update({
+      where: { id },
+      data: { status: status as any },
     });
   }
 

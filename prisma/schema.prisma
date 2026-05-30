@@ -39,6 +39,12 @@ enum Role {
   USER
 }
 
+enum RecipeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Recipe {
   id Int @id @default(autoincrement())
   title       String
@@ -53,6 +59,7 @@ model Recipe {
   steps       String
   rating Float @default(0)
   isPremium Boolean @default(false)
+  status RecipeStatus @default(APPROVED)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

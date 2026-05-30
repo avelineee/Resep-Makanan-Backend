@@ -44,6 +44,8 @@ export class RecipesController {
     @Query('page') page = '1',
 
     @Query('limit') limit = '100',
+
+    @Query('status') status?: string,
   ) {
 
     const recipes =
@@ -51,7 +53,8 @@ export class RecipesController {
         search,
         category,
         Number(page),
-        Number(limit)
+        Number(limit),
+        status
       );
 
     return {
@@ -72,16 +75,16 @@ export class RecipesController {
   @Post()
   async createRecipe(
     @Req() req: any,
-    @Body() dto: CreateRecipeDto,
+    @Body() dto: any,
   ) {
-
-    if (req.user.role !== 'ADMIN') {
-      throw new ForbiddenException(
-        'Only admin can create recipe',
-      );
-    }
-
-    const recipe = await this.recipesService.create(dto);
+    // Normal users create PENDING recipes, Admins create APPROVED recipes (or custom)
+    const status = req.user.role === 'ADMIN' ? (dto.status || 'APPROVED') : 'PENDING';
+    
+    const recipe = await this.recipesService.create({
+      ...dto,
+      status,
+      authorId: req.user.id
+    });
 
     return {
       message: 'Create recipe success',
@@ -114,6 +117,25 @@ export class RecipesController {
       recipe,
     };
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/verify')
+  async verifyRecipe(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body('status') status: string,
+  ) {
+    if (req.user.role !== 'ADMIN') {
+      throw new ForbiddenException('Only admin can verify recipes');
+    }
+    const recipe = await this.recipesService.verifyRecipe(Number(id), status);
+    return {
+      success: true,
+      message: `Recipe has been ${status.toLowerCase()}`,
+      recipe,
+    };
+  }
+
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async deleteRecipe(
