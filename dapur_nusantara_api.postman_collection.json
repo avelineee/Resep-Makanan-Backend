@@ -1,0 +1,509 @@
+{
+  "info": {
+    "_postman_id": "dapur-nusantara-api-v1",
+    "name": "Dapur Nusantara API",
+    "description": "Koleksi lengkap semua endpoint REST API backend Dapur Nusantara. Base URL: https://resep-makanan-backend-production.up.railway.app",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "https://resep-makanan-backend-production.up.railway.app", "type": "string" },
+    { "key": "token", "value": "", "type": "string", "description": "JWT token dari response /auth/login" }
+  ],
+  "item": [
+
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"johndoe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.access_token) { pm.collectionVariables.set('token', json.access_token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Profile (me)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🍳 Recipes",
+      "item": [
+        {
+          "name": "Get All Recipes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/recipes",
+              "host": ["{{base_url}}"],
+              "path": ["recipes"],
+              "query": [
+                { "key": "search",   "value": "", "disabled": true, "description": "Keyword pencarian" },
+                { "key": "category", "value": "", "disabled": true, "description": "Filter kategori" },
+                { "key": "page",     "value": "1", "description": "Halaman (default: 1)" },
+                { "key": "limit",    "value": "100", "description": "Jumlah item (default: 100)" },
+                { "key": "status",   "value": "", "disabled": true, "description": "PENDING | APPROVED | REJECTED" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Recipe by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/recipes/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Get Trending Recipes",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/recipes/trending"
+          }
+        },
+        {
+          "name": "Get Recipe Tags",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/recipes/tags"
+          }
+        },
+        {
+          "name": "Create Recipe",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/recipes",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Nasi Goreng Spesial\",\n  \"description\": \"Nasi goreng dengan bumbu rahasia\",\n  \"category\": \"Makanan Utama\",\n  \"imageUrl\": \"https://res.cloudinary.com/example/image.jpg\",\n  \"prepTime\": \"10 mnt\",\n  \"cookTime\": \"15 mnt\",\n  \"servings\": 2,\n  \"calories\": 450,\n  \"difficulty\": \"Mudah\",\n  \"ingredients\": \"[{\\\"name\\\":\\\"Nasi\\\",\\\"amount\\\":\\\"2 piring\\\"},{\\\"name\\\":\\\"Telur\\\",\\\"amount\\\":\\\"2 butir\\\"}]\",\n  \"steps\": \"[{\\\"stepNumber\\\":1,\\\"description\\\":\\\"Panaskan minyak\\\",\\\"icon\\\":\\\"🔥\\\"},{\\\"stepNumber\\\":2,\\\"description\\\":\\\"Masukkan nasi\\\",\\\"icon\\\":\\\"🍚\\\"}]\",\n  \"tags\": [\"nasi\", \"goreng\", \"indonesia\"]\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Recipe (Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/recipes/1",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Nasi Goreng Spesial Update\",\n  \"description\": \"Deskripsi baru\",\n  \"category\": \"Makanan Utama\",\n  \"imageUrl\": \"https://res.cloudinary.com/example/updated.jpg\",\n  \"prepTime\": \"10 mnt\",\n  \"cookTime\": \"20 mnt\",\n  \"servings\": 3,\n  \"calories\": 500\n}"
+            }
+          }
+        },
+        {
+          "name": "Verify Recipe (Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/recipes/1/verify",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete Recipe (Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/recipes/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Upload Recipe Image",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/recipes/upload",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "image", "type": "file", "src": "", "description": "File gambar (jpg/png/webp)" }]
+            }
+          }
+        },
+        {
+          "name": "Add Review to Recipe",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/recipes/1/reviews",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Resep ini sangat lezat!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Reviews for Recipe",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/recipes/1/reviews"
+          }
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/recipes/1/reviews",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🎬 Tutorials",
+      "item": [
+        {
+          "name": "Get All Tutorials",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/tutorials"
+          }
+        },
+        {
+          "name": "Get Tutorial by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/tutorials/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Watch Tutorial (get video URL)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/tutorials/1/watch",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "description": "Returns videoUrl. Free tutorials (price=0) always accessible. Premium requires purchase."
+          }
+        },
+        {
+          "name": "Create Tutorial",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/tutorials",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Cara Membuat Soto Ayam\",\n  \"description\": \"Tutorial memasak soto ayam dari bahan segar\",\n  \"videoUrl\": \"https://www.youtube.com/watch?v=example\",\n  \"thumbnailUrl\": \"https://res.cloudinary.com/example/thumb.jpg\",\n  \"duration\": 900,\n  \"price\": 0,\n  \"recipeId\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Tutorial",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/tutorials/1",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Tutorial Update\",\n  \"description\": \"Deskripsi baru\",\n  \"videoUrl\": \"https://res.cloudinary.com/example/new-video.mp4\",\n  \"thumbnailUrl\": \"https://res.cloudinary.com/example/new-thumb.jpg\",\n  \"duration\": 1200,\n  \"price\": 15000\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Tutorial",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/tutorials/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Upload Tutorial Video",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/tutorials/upload/video",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "video", "type": "file", "src": "", "description": "File video (mp4/mov/webm)" }]
+            }
+          }
+        },
+        {
+          "name": "Upload Tutorial Thumbnail",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/tutorials/upload/thumbnail",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "thumbnail", "type": "file", "src": "", "description": "File gambar thumbnail (jpg/png)" }]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "💳 Transactions",
+      "item": [
+        {
+          "name": "Buy Tutorial (Create Transaction)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/transactions/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "description": "Param :tutorialId adalah ID tutorial yang ingin dibeli. Tidak perlu body."
+          }
+        },
+        {
+          "name": "Get My Transactions",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/transactions/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Get All Transactions (Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/transactions",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Verify Transaction (Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/transactions/1/verify",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "description": "Admin verify transaksi untuk memberi akses tutorial ke user."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👤 Users",
+      "item": [
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/users",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Add Recipe to Favorites",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/users/me/favorites/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "description": "Param :recipeId adalah ID resep yang di-favoritkan."
+          }
+        },
+        {
+          "name": "Get My Favorites",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/users/me/favorites",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Remove Recipe from Favorites",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/users/me/favorites/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Get My Reviews",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/users/me/reviews",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📓 Journals",
+      "item": [
+        {
+          "name": "Create Weekly Journal",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/journals",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"weekStart\": \"2026-05-26T00:00:00.000Z\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Add Entry to Journal",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/journals/1/entries",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipeId\": 1,\n  \"dayOfWeek\": \"Senin\",\n  \"mealType\": \"Makan Siang\",\n  \"notes\": \"Suka banget resepnya\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get My Journals",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/journals/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Delete Journal Entry",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/journals/entries/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Get Shopping List",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/journals/shopping-list",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📁 Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/categories"
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/categories",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Makanan Utama\",\n  \"description\": \"Hidangan utama sehari-hari\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📧 Newsletter",
+      "item": [
+        {
+          "name": "Subscribe Newsletter",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/newsletter/subscribe",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Subscribers",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/newsletter"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📊 Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/dashboard/stats",
+            "description": "Returns totalRecipes, totalUsers, totalTutorials, etc."
+          }
+        }
+      ]
+    }
+
+  ]
+}
