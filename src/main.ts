@@ -19,6 +19,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
+      "*",
       "https://resep-makanan-frontend.vercel.app",
       "https://resep-makanan-frontend-production.up.railway.app",
       "http://localhost:3000",
