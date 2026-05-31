@@ -4,6 +4,8 @@ import {
   Get,
   Param,
   Post,
+  Patch,
+  Delete,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -98,4 +100,30 @@ async watchTutorial(
       tutorial.videoUrl,
   };
 }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  async updateTutorial(
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
+    const tutorial = await this.tutorialsService.update(Number(id), body);
+    return {
+      success: true,
+      message: 'Tutorial updated successfully',
+      tutorial,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async deleteTutorial(
+    @Param('id') id: string,
+  ) {
+    await this.tutorialsService.remove(Number(id));
+    return {
+      success: true,
+      message: 'Tutorial deleted successfully',
+    };
+  }
 }

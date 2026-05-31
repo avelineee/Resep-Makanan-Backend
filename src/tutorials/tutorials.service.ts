@@ -106,4 +106,24 @@ async watchTutorial(
 
   return tutorial;
 }
+
+  async update(id: number, data: any) {
+    const tutorial = await this.prisma.tutorial.findUnique({ where: { id } });
+    if (!tutorial) {
+      throw new NotFoundException('Tutorial not found');
+    }
+    return this.prisma.tutorial.update({
+      where: { id },
+      data,
+      include: { recipe: true },
+    });
+  }
+
+  async remove(id: number) {
+    const tutorial = await this.prisma.tutorial.findUnique({ where: { id } });
+    if (!tutorial) {
+      throw new NotFoundException('Tutorial not found');
+    }
+    return this.prisma.tutorial.delete({ where: { id } });
+  }
 }
