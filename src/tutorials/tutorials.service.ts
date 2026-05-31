@@ -97,7 +97,8 @@ async watchTutorial(
 
   if (
     !access &&
-    user?.role !== 'ADMIN'
+    user?.role !== 'ADMIN' &&
+    tutorial.price > 0
   ) {
     throw new ForbiddenException(
       'You need to purchase this tutorial first',
