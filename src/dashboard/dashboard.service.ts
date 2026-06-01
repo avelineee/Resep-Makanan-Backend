@@ -7,28 +7,26 @@ export class DashboardService {
   ) {}
 
   async getStats() {
-
-    const totalUsers =
-      await this.prisma.user.count();
-
-    const totalRecipes =
-      await this.prisma.recipe.count();
-
-    const totalReviews =
-      await this.prisma.review.count();
-
-    const totalFavorites =
-      await this.prisma.favorite.count();
-
-    const totalCategories =
-      await this.prisma.category.count();
-
-    const totalNewsletterSubscribers =
-      await this.prisma.newsletter.count();
-
     const fourWeeksAgo = new Date();
     fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
-    const [recentUsers, recentReviews, recentFavorites] = await Promise.all([
+
+    const [
+      totalUsers,
+      totalRecipes,
+      totalReviews,
+      totalFavorites,
+      totalCategories,
+      totalNewsletterSubscribers,
+      recentUsers,
+      recentReviews,
+      recentFavorites,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.recipe.count(),
+      this.prisma.review.count(),
+      this.prisma.favorite.count(),
+      this.prisma.category.count(),
+      this.prisma.newsletter.count(),
       this.prisma.user.findMany({
         where: { createdAt: { gte: fourWeeksAgo } },
         select: { createdAt: true },
