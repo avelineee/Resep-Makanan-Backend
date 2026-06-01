@@ -23,7 +23,7 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  profileImage String?
   favorites  Favorite[] 
   reviews Review[]
   journals Journal[]
@@ -31,6 +31,7 @@ model User {
   transactions Transaction[]
   tutorialAccesses UserTutorialAccess[]
   activities Activity[]
+   isPremium Boolean @default(false)
 }
 
 enum Role {
@@ -70,6 +71,7 @@ model Recipe {
   stepItems Step[]
   tutorial Tutorial?
   tags RecipeTag[]
+  isPremium Boolean @default(false)
   
 
 author User? @relation(fields: [authorId], references: [id])

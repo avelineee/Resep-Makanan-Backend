@@ -8,13 +8,13 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Post('register')
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
-   @Post('login')
+  @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
@@ -24,12 +24,13 @@ export class AuthController {
     return this.authService.googleLogin(token);
   }
   @UseGuards(JwtAuthGuard)
-@UseGuards(JwtAuthGuard)
-@Get('me')
-getProfile(@Req() req: any) {
-  return {
-    message: 'Get profile success',
-    user: req.user,
-  };
-}
+  @UseGuards(JwtAuthGuard)
+  
+  @Get('me')
+  getProfile(@Req() req: any) {
+    return {
+      message: 'Get profile success',
+      user: req.user,
+    };
+  }
 }

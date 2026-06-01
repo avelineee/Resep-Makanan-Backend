@@ -106,4 +106,64 @@ async getFavorites(userId: number) {
       orderBy: { createdAt: 'desc' }
     });
   }
+
+  async update(
+  id: number,
+  data: any,
+) {
+
+  const user =
+    await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+  if (!user) {
+    throw new NotFoundException(
+      'User not found',
+    );
+  }
+
+  return this.prisma.user.update({
+    where: {
+      id,
+    },
+
+    data: {
+      ...(data?.username && {
+        username: data.username,
+      }),
+
+      ...(data?.email && {
+        email: data.email,
+      }),
+
+      ...(data?.profileImage && {
+        profileImage:
+          data.profileImage,
+      }),
+
+      ...(data?.role && {
+        role: data.role,
+      }),
+
+      ...(typeof data?.isPremium ===
+        'boolean' && {
+        isPremium:
+          data.isPremium,
+      }),
+    },
+
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      role: true,
+      profileImage: true,
+      isPremium: true,
+      createdAt: true,
+    },
+  });
+}
 }

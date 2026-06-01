@@ -5,15 +5,20 @@ import {
   Post,
   Param,
   Delete,
+  Patch,
+  Body,
   UseGuards,
   ForbiddenException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService, private cloudinaryService: CloudinaryService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -97,4 +102,51 @@ async removeFavorite(
       reviews,
     };
   }
+
+  @UseGuards(JwtAuthGuard)
+@Patch(':id')
+@UseInterceptors(
+  FileInterceptor('image'),
+)
+async updateUser(
+  @Req() req: any,
+
+  @Param('id') id: string,
+
+  @Body() body: any,
+
+  @UploadedFile()
+  file: any,
+) {
+
+  const targetUserId =
+    Number(id);
+
+  const isAdmin =
+    req.user.role === 'ADMIN';
+
+  const isOwnProfile =
+    req.user.id === targetUserId;
+
+  if (!isAdmin && !isOwnProfile) {
+    throw new ForbiddenException(
+      'You can only update your own profile',
+    );
+  }
+
+  if (file) {
+
+    const uploadedImage: any =
+      await this.cloudinaryService
+        .uploadImage(file);
+
+    body.profileImage =
+      uploadedImage.secure_url;
+  }
+
+  return this.usersService.update(
+    targetUserId,
+    body,
+  );
+}
 }
