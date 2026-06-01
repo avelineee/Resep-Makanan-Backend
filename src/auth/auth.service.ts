@@ -145,4 +145,11 @@ async googleLogin(token: string) {
   }
 }
 
+async getProfile(email: string) {
+  const user = await this.usersService.findByEmail(email);
+  if (!user) throw new UnauthorizedException('User not found');
+  const { password, ...result } = user as any;
+  return result;
+}
+
 }

@@ -46,11 +46,9 @@ export class TutorialsController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getTutorialDetail(
     @Param('id') id: string,
-    @Req() req: any,
   ) {
     const tutorial = await this.tutorialsService.findOne(Number(id));
     return {
