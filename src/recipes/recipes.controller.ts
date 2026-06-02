@@ -26,6 +26,7 @@ import { AnyNaptrRecord } from 'dns';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 
+
 @Controller('recipes')
 export class RecipesController {
   constructor(
@@ -76,10 +77,11 @@ export class RecipesController {
   @Post()
   async createRecipe(
     @Req() req: any,
-    @Body() dto: any,
+    @Body() dto: CreateRecipeDto,
   ) {
     // Normal users create PENDING recipes, Admins create APPROVED recipes (or custom)
-    const status = req.user.role === 'ADMIN' ? (dto.status || 'APPROVED') : 'PENDING';
+    const status = 
+    req.user.role === 'ADMIN' ? 'APPROVED' : 'PENDING';
     
     const recipe = await this.recipesService.create({
       ...dto,
