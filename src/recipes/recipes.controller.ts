@@ -138,6 +138,9 @@ export class RecipesController {
     if (dto.steps) {
       dto.steps = JSON.parse(dto.steps as any);
     }
+    dto.servings = Number(dto.servings);
+    dto.calories = Number(dto.calories);
+
 
     const recipe =
       await this.recipesService.create({
@@ -183,6 +186,18 @@ export class RecipesController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      status: {
+        type: 'string',
+        enum: ['APPROVED', 'REJECTED'],
+      },
+    },
+  },
+})
+
   @Patch(':id/verify')
   async verifyRecipe(
     @Req() req: any,
@@ -346,6 +361,18 @@ export class RecipesController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiConsumes('multipart/form-data')
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      image: {
+        type: 'string',
+        format: 'binary',
+      },
+    },
+  },
+})
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('image'),
