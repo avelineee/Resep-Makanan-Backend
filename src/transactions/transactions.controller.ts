@@ -11,6 +11,14 @@ import {
 
 import { TransactionsService }from './transactions.service';
 import { JwtAuthGuard }from 'src/auth/guards/jwt-auth.guard';
+import {
+  UploadedFile, UseInterceptors,} from '@nestjs/common';
+
+import { FileInterceptor }from '@nestjs/platform-express';
+
+import { CloudinaryService }from 'src/cloudinary/cloudinary.service';
+
+
 
 
 @Controller('transactions')
@@ -18,38 +26,71 @@ export class TransactionsController {
   constructor(
     private transactionsService:
       TransactionsService,
+       private cloudinaryService:
+    CloudinaryService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
-  @Post(':tutorialId')
-  async createTransaction(
-    @Req() req: any,
+@Post(':tutorialId')
+@UseInterceptors(
+  FileInterceptor('paymentProof'),
+)
+async createTransaction(
+  @Req() req: any,
 
-    @Param('tutorialId')
-    tutorialId: string,
-  ) {
+  @Param('tutorialId')
+  tutorialId: string,
 
-    const transaction =
-      await this.transactionsService.create(
-        req.user.id,
-        Number(tutorialId),
-      );
+  @UploadedFile()
+  file: any,
 
-    return {
-      success: true,
+  
+)
+ {
+  console.log('MASUK ENDPOINT');
+console.log('FILE =', file);
+console.log('USER =', req.user);
+console.log('TUTORIAL ID =', tutorialId);
+  
 
-      message:
-        'Transaction created successfully',
+  let paymentProof: string | null =
+    null;
 
-      transaction,
-    };
+  if (file) {
+
+    const uploadedImage: any =
+      await this.cloudinaryService
+        .uploadImage(file);
+        console.log(uploadedImage);
+
+    paymentProof =
+      uploadedImage.secure_url;
   }
+  console.log(req.user);
+
+  const transaction =
+    await this.transactionsService.create(
+  req.user.id,
+  Number(tutorialId),
+  paymentProof,
+);
+
+  return {
+    success: true,
+    message:
+      'Transaction created successfully',
+    transaction,
+  };
+}
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMyTransactions(
     @Req() req: any,
-  ) {
+
+  ) 
+  
+  {
 
     const transactions =
       await this.transactionsService
@@ -116,4 +157,5 @@ async verifyTransaction(
     transaction,
   };
 }
+
 }

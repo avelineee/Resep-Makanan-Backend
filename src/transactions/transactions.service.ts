@@ -11,6 +11,7 @@ export class TransactionsService {
   async create(
     userId: number,
     tutorialId: number,
+    paymentProof: string | null,
   ) {
 
     const tutorial =
@@ -34,6 +35,7 @@ export class TransactionsService {
 
         amount:
           tutorial.price,
+          paymentProof,
 
         status: 'PENDING',
       },
@@ -75,7 +77,8 @@ export class TransactionsService {
           select: {
             id: true,
             username: true,
-            email: true
+            email: true,
+          
           }
         }
       },

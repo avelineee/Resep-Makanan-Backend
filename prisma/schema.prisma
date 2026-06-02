@@ -193,6 +193,7 @@ model Transaction {
   userId    Int
   tutorialId Int
   amount    Int
+   paymentProof String?
 
   status    TransactionStatus @default(PENDING)
   createdAt DateTime @default(now())
