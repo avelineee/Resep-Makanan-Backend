@@ -31,54 +31,18 @@ export class TutorialsController {
     private cloudinaryService: CloudinaryService,
   ) { }
 
-@ApiConsumes('multipart/form-data')
 @ApiBody({
-  schema: {
-    type: 'object',
-    properties: {
-
-      recipeId: {
-        type: 'number',
-        example: 1,
-      },
-
-      title: {
-        type: 'string',
-      },
-
-      description: {
-        type: 'string',
-      },
-
-      videoUrl: {
-        type: 'string',
-      },
-
-      thumbnailUrl: {
-        type: 'string',
-      },
-
-      duration: {
-        type: 'number',
-        example: 600,
-      },
-
-      price: {
-        type: 'number',
-        example: 25000,
-      },
-    },
-  },
+  type: CreateTutorialDto,
 })
 
 @Post()
 async createTutorial(
-  @Body() body: any,
+  @Body() dto: CreateTutorialDto,
 ) {
-   console.log('BODY = ', body);
-   
+  console.log('DTO = ', dto);
+
   const tutorial =
-    await this.tutorialsService.create(body);
+    await this.tutorialsService.create(dto);
 
   return {
     success: true,

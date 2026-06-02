@@ -1,12 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
-import { IsInt } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateTutorialDto {
+
+  @ApiProperty({ example: 1 })
   @IsInt()
-recipeId!: number;
-  
-    @ApiProperty({
+  recipeId!: number;
+
+  @ApiProperty({
     example: 'Cara Membuat Nasi Goreng',
   })
   @IsString()
@@ -20,33 +25,23 @@ recipeId!: number;
 
   @ApiProperty({
     example: 'https://youtube.com/watch?v=abc123',
-    required: false,
   })
-  @IsOptional()
   @IsString()
-  videoUrl?: string;
+  videoUrl!: string;
 
   @ApiProperty({
-    example: 'https://i.ytimg.com/thumbnail.jpg',
+    example: 'https://example.com/thumb.jpg',
     required: false,
   })
   @IsOptional()
   @IsString()
   thumbnailUrl?: string;
 
-  @ApiProperty({
-  example: 1,
-})
+  @ApiProperty({ example: 600 })
+  @IsInt()
+  duration!: number;
 
-@ApiProperty({
-  example: 600,
-})
-@IsInt()
-duration!: number;
-
-@ApiProperty({
-  example: 25000,
-})
-@IsInt()
-price!: number;
+  @ApiProperty({ example: 25000 })
+  @IsInt()
+  price!: number;
 }
