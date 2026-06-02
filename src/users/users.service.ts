@@ -139,6 +139,10 @@ async getFavorites(userId: number) {
         email: data.email,
       }),
 
+      ...(data?.bio !== undefined && {
+        bio: data.bio,
+      }),
+
       ...(data?.profileImage && {
         profileImage:
           data.profileImage,
@@ -159,6 +163,7 @@ async getFavorites(userId: number) {
       id: true,
       username: true,
       email: true,
+      bio: true,
       role: true,
       profileImage: true,
       isPremium: true,

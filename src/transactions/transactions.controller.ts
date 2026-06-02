@@ -8,15 +8,14 @@ import {
   Patch,
     ForbiddenException,
 } from '@nestjs/common';
-
+import { Res } from '@nestjs/common';
+import { Response } from 'express';
 import { TransactionsService }from './transactions.service';
 import { JwtAuthGuard }from 'src/auth/guards/jwt-auth.guard';
-import {
-  UploadedFile, UseInterceptors,} from '@nestjs/common';
-
+import {UploadedFile, UseInterceptors,} from '@nestjs/common';
 import { FileInterceptor }from '@nestjs/platform-express';
-
 import { CloudinaryService }from 'src/cloudinary/cloudinary.service';
+
 
 
 
@@ -156,6 +155,31 @@ async verifyTransaction(
 
     transaction,
   };
+}
+
+@UseGuards(JwtAuthGuard)
+@Get('summary')
+async getTransactionSummary(
+  @Req() req: any,
+) {
+  return this.transactionsService
+    .getTransactionSummary(
+      req.user.id,
+    );
+}
+
+@Get('download-history')
+@UseGuards(JwtAuthGuard)
+async downloadHistory(
+  @Req() req: any,
+  @Res() res: any,
+) {
+
+  return this.transactionsService
+    .downloadHistory(
+      req.user.id,
+      res,
+    );
 }
 
 }
