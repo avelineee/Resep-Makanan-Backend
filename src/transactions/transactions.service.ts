@@ -56,6 +56,7 @@ export class TransactionsService {
         tutorial: {
           include: {
             recipe: true
+
           }
         }
       },
@@ -200,133 +201,173 @@ async downloadHistory(
       },
 
       include: {
-        tutorial: true,
+        tutorial: {
+          include: {
+            recipe: true,
+          },
+        },
       },
     });
 
   const doc = new PDFDocument({
-  margin: 50,
-});
-
-res.setHeader(
-  'Content-Type',
-  'application/pdf',
-);
-
-res.setHeader(
-  'Content-Disposition',
-  'attachment; filename=riwayat-pembelian.pdf',
-);
-
-doc.pipe(res);
-
-// Header
-doc
-  .fontSize(24)
-  .text('DAPUR NUSANTARA', {
-    align: 'center',
+    size: 'A4',
+    margin: 50,
   });
 
-doc
-  .fontSize(16)
-  .text('Laporan Pembelian Tutorial', {
-    align: 'center',
-  });
+  res.setHeader(
+    'Content-Type',
+    'application/pdf',
+  );
 
-doc.moveDown();
+  res.setHeader(
+    'Content-Disposition',
+    'attachment; filename=riwayat-pembelian.pdf',
+  );
 
-doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`);
+  doc.pipe(res);
 
-doc.moveDown();
+  // 1. Header Banner (Forest Green background strip)
+  doc.fillColor('#006d36').rect(50, 40, 495, 60).fill();
 
-doc.moveTo(50, doc.y)
-   .lineTo(550, doc.y)
-   .stroke();
+  // Logo / App Name inside banner
+  doc.fillColor('#ffffff')
+     .font('Helvetica-Bold')
+     .fontSize(18)
+     .text('DAPUR NUSANTARA', 65, 53);
 
-doc.moveDown();
+  doc.font('Helvetica')
+     .fontSize(9)
+     .text('Resep & Tutorial Kuliner Autentik', 65, 75);
 
-const user =
-  await this.prisma.user.findUnique({
+  // Receipt Label on right side of banner
+  doc.font('Helvetica-Bold')
+     .fontSize(13)
+     .text('NOTA PEMBELIAN', 370, 53, { width: 160, align: 'right' });
+
+  doc.font('Helvetica')
+     .fontSize(8.5)
+     .text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`, 370, 75, { width: 160, align: 'right' });
+
+  // 2. User & Transaction Info
+  const user = await this.prisma.user.findUnique({
     where: {
       id: userId,
     },
   });
 
-doc.text(
-  `Nama: ${user?.username ?? '-'}`,
-);
+  doc.fillColor('#1a1c1d')
+     .font('Helvetica-Bold')
+     .fontSize(9.5)
+     .text('DITERBITKAN UNTUK:', 50, 125);
 
-doc.text(
-  `Email: ${user?.email ?? '-'}`,
-);
+  doc.fillColor('#4f5e55')
+     .font('Helvetica')
+     .fontSize(9)
+     .text(`Nama: ${user?.username ?? '-'}`, 50, 140)
+     .text(`Email: ${user?.email ?? '-'}`, 50, 153);
 
-doc.moveDown();
+  doc.fillColor('#1a1c1d')
+     .font('Helvetica-Bold')
+     .fontSize(9.5)
+     .text('RINCIAN INVOICE:', 330, 125);
 
-doc.moveTo(50, doc.y)
-   .lineTo(550, doc.y)
-   .stroke();
+  doc.fillColor('#4f5e55')
+     .font('Helvetica')
+     .fontSize(9)
+     .text(`Jumlah Item: ${transactions.length} Tutorial`, 330, 140)
+     .text('Status Pembayaran: Lunas (Terverifikasi)', 330, 153);
 
-doc.moveDown();
+  // 3. Table Header
+  doc.fillColor('#006d36').rect(50, 185, 495, 22).fill();
 
-let total = 0;
+  doc.fillColor('#ffffff')
+     .font('Helvetica-Bold')
+     .fontSize(8.5)
+     .text('NO', 58, 192)
+     .text('TUTORIAL & RESEP', 80, 192)
+     .text('TANGGAL BELI', 330, 192)
+     .text('HARGA (IDR)', 430, 192, { width: 105, align: 'right' });
 
-transactions.forEach(
-  (trx, index) => {
+  // 4. Table Body
+  let currentY = 207;
+  let total = 0;
 
+  transactions.forEach((trx, index) => {
     total += trx.amount;
 
-    doc.fontSize(12)
-      .text(
-        `${index + 1}. ${trx.tutorial.title}`,
-      );
+    // Check page overflow
+    if (currentY > 730) {
+      doc.addPage();
+      currentY = 50;
 
-    doc.text(
-      `Harga: Rp${trx.amount.toLocaleString(
-        'id-ID',
-      )}`,
-    );
+      // Redraw table header on new page
+      doc.fillColor('#006d36').rect(50, currentY, 495, 22).fill();
+      doc.fillColor('#ffffff')
+         .font('Helvetica-Bold')
+         .fontSize(8.5)
+         .text('NO', 58, currentY + 7)
+         .text('TUTORIAL & RESEP', 80, currentY + 7)
+         .text('TANGGAL BELI', 330, currentY + 7)
+         .text('HARGA (IDR)', 430, currentY + 7, { width: 105, align: 'right' });
+      currentY += 24;
+    }
 
-    doc.text(
-      `Tanggal: ${trx.createdAt.toLocaleDateString(
-        'id-ID',
-      )}`,
-    );
+    // Alternating Row Background
+    if (index % 2 === 1) {
+      doc.fillColor('#f8faf8').rect(50, currentY, 495, 22).fill();
+    }
 
-    doc.moveDown();
-  },
-);
+    const titleText = trx.tutorial?.recipe?.title
+      ? `${trx.tutorial.title} (${trx.tutorial.recipe.title})`
+      : (trx.tutorial?.title || '—');
 
-doc.moveTo(50, doc.y)
-   .lineTo(550, doc.y)
-   .stroke();
+    doc.fillColor('#1a1c1d')
+       .font('Helvetica')
+       .fontSize(8.5)
+       .text(String(index + 1), 58, currentY + 6)
+       .text(titleText, 80, currentY + 6, { width: 240, lineBreak: false })
+       .text(new Date(trx.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }), 330, currentY + 6)
+       .font('Helvetica-Bold')
+       .text(`Rp ${trx.amount.toLocaleString('id-ID')}`, 430, currentY + 6, { width: 105, align: 'right' });
 
-doc.moveDown();
+    // Draw separator line
+    doc.strokeColor('#e1e3e0').lineWidth(0.5).moveTo(50, currentY + 22).lineTo(545, currentY + 22).stroke();
+    currentY += 22;
+  });
 
-doc.fontSize(14)
-  .text(
-    `Total Tutorial Dibeli: ${transactions.length}`,
-  );
+  // 5. Invoice Totals Block
+  currentY += 10;
+  doc.strokeColor('#006d36').lineWidth(0.8).moveTo(330, currentY).lineTo(545, currentY).stroke();
 
-doc.text(
-  `Total Pengeluaran: Rp${total.toLocaleString(
-    'id-ID',
-  )}`,
-  {
-    underline: true,
-  },
-);
+  doc.fillColor('#4f5e55')
+     .font('Helvetica')
+     .fontSize(8.5)
+     .text('Total Item:', 330, currentY + 8)
+     .fillColor('#1a1c1d')
+     .text(`${transactions.length}`, 430, currentY + 8, { width: 105, align: 'right' });
 
-doc.moveDown(2);
+  doc.fillColor('#1a1c1d')
+     .font('Helvetica-Bold')
+     .fontSize(9.5)
+     .text('Total Pembayaran:', 330, currentY + 22)
+     .fillColor('#006d36')
+     .fontSize(11)
+     .text(`Rp ${total.toLocaleString('id-ID')}`, 430, currentY + 22, { width: 105, align: 'right' });
 
-doc.fontSize(11)
-  .text(
-    'Terima kasih telah menggunakan Dapur Nusantara',
-    {
-      align: 'center',
-    },
-  );
+  // 6. Professional Footer Message
+  doc.strokeColor('#e1e3e0').lineWidth(0.5).moveTo(50, 720).lineTo(545, 720).stroke();
 
-doc.end();
+  doc.fillColor('#7d8a80')
+     .font('Helvetica')
+     .fontSize(7.5)
+     .text('Dokumen ini diterbitkan secara otomatis dan sah sebagai bukti pembayaran resmi Dapur Nusantara.', 50, 735, { align: 'center', width: 495 });
+
+  doc.fillColor('#006d36')
+     .font('Helvetica-Bold')
+     .fontSize(8.5)
+     .text('Terima kasih telah bergabung dalam perjalanan kuliner kami!', 50, 748, { align: 'center', width: 495 });
+
+  doc.end();
 }
 
 }
