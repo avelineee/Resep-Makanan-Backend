@@ -153,16 +153,43 @@ async updateTutorial(
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        video: {
-          type: 'string',
-          format: 'binary',
-        },
+  schema: {
+    type: 'object',
+    properties: {
+
+      recipeId: {
+        type: 'number',
+        example: 1,
+      },
+
+      title: {
+        type: 'string',
+      },
+
+      description: {
+        type: 'string',
+      },
+
+      videoUrl: {
+        type: 'string',
+      },
+
+      thumbnailUrl: {
+        type: 'string',
+      },
+
+      video: {
+        type: 'string',
+        format: 'binary',
+      },
+
+      thumbnail: {
+        type: 'string',
+        format: 'binary',
       },
     },
-  })
+  },
+})
   @Post('upload/video')
   @UseInterceptors(FileInterceptor('video'))
   async uploadVideo(
