@@ -2,6 +2,7 @@ import {Injectable,NotFoundException,} from '@nestjs/common';
 
 import { PrismaService }from 'src/prisma/prisma.service';
 import PDFDocument from 'pdfkit';
+import { TransactionStatus } from '@prisma/client';
 
 @Injectable()
 export class TransactionsService {
@@ -89,8 +90,9 @@ export class TransactionsService {
       },
     });
   }
-  async verifyTransaction(
+ async verifyTransaction(
   id: number,
+  status: 'SUCCESS' | 'FAILED',
 ) {
 
   const transaction =
@@ -111,43 +113,33 @@ export class TransactionsService {
     where: {
       id,
     },
-
     data: {
-      status: 'SUCCESS',
+      status,
     },
   });
 
-await this.prisma.userTutorialAccess.create({
+if (status === 'SUCCESS') {
 
+  await this.prisma.userTutorialAccess.create({
     data: {
-      userId:
-        transaction.userId,
-
-      tutorialId:
-        transaction.tutorialId,
-
-      transactionId:
-        transaction.id,
+      userId: transaction.userId,
+      tutorialId: transaction.tutorialId,
+      transactionId: transaction.id,
     },
   });
 
   await this.prisma.activity.create({
-  data: {
-    userId:
-      transaction.userId,
-
-    type:
-      'TUTORIAL_PURCHASED',
-
-    metadata: {
-      tutorialId:
-        transaction.tutorialId,
-
-      transactionId:
-        transaction.id,
+    data: {
+      userId: transaction.userId,
+      type: 'TUTORIAL_PURCHASED',
+      metadata: {
+        tutorialId: transaction.tutorialId,
+        transactionId: transaction.id,
+      },
     },
-  },
-});
+  });
+
+}
 
 return updatedTransaction;
 }

@@ -21,6 +21,8 @@ import { TutorialsService } from './tutorials.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CreateTutorialDto } from './dto/create-tutorial.dto';
+import { UpdateTutorialDto } from './dto/update-tutorial.dto';
 
 @Controller('tutorials')
 export class TutorialsController {
@@ -29,17 +31,53 @@ export class TutorialsController {
     private cloudinaryService: CloudinaryService,
   ) { }
 
-  @Post()
-  async createTutorial(
-    @Body() body: any,
-  ) {
-    const tutorial = await this.tutorialsService.create(body);
-    return {
-      success: true,
-      message: 'Tutorial created successfully',
-      tutorial,
-    };
-  }
+@ApiConsumes('multipart/form-data')
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      title: {
+        type: 'string',
+      },
+
+      description: {
+        type: 'string',
+      },
+
+      videoUrl: {
+        type: 'string',
+      },
+
+      thumbnailUrl: {
+        type: 'string',
+      },
+
+      video: {
+        type: 'string',
+        format: 'binary',
+      },
+
+      thumbnail: {
+        type: 'string',
+        format: 'binary',
+      },
+    },
+  },
+})
+
+@Post()
+async createTutorial(
+  @Body() body: any,
+) {
+  const tutorial =
+    await this.tutorialsService.create(body);
+
+  return {
+    success: true,
+    message: 'Tutorial created successfully',
+    tutorial,
+  };
+}
 
   @Get()
   async getTutorials() {
@@ -78,18 +116,23 @@ export class TutorialsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
-  async updateTutorial(
-    @Param('id') id: string,
-    @Body() body: any,
-  ) {
-    const tutorial = await this.tutorialsService.update(Number(id), body);
-    return {
-      success: true,
-      message: 'Tutorial updated successfully',
-      tutorial,
-    };
-  }
+@Patch(':id')
+async updateTutorial(
+  @Param('id') id: string,
+  @Body() dto: UpdateTutorialDto,
+) {
+  const tutorial =
+    await this.tutorialsService.update(
+      Number(id),
+      dto,
+    );
+
+  return {
+    success: true,
+    message: 'Tutorial updated successfully',
+    tutorial,
+  };
+}
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)

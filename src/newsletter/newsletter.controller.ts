@@ -1,6 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { NewsletterService } from './newsletter.service';
 import {Body,  Get, Post} from '@nestjs/common';
+import { CreateNewsletterDto } from './dto/create-newsletter.dto';
 
 @Controller('newsletter')
 export class NewsletterController {
@@ -10,24 +11,21 @@ export class NewsletterController {
   ) {}
 
   @Post('subscribe')
-  async subscribe(
-    @Body('email') email: string,
-  ) {
+async subscribe(
+  @Body() dto: CreateNewsletterDto,
+) {
+  const subscriber =
+    await this.newsletterService.subscribe(
+      dto.email,
+    );
 
-    const subscriber =
-      await this.newsletterService.subscribe(
-        email,
-      );
-
-    return {
-      success: true,
-
-      message:
-        'Newsletter subscription successful',
-
-      subscriber,
-    };
-  }
+  return {
+    success: true,
+    message:
+      'Newsletter subscription successful',
+    subscriber,
+  };
+}
   @Get()
 async getNewsletterSubscribers() {
 

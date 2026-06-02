@@ -156,15 +156,43 @@ export class RecipesController {
     };
   }
 
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        description: { type: 'string' },
+        category: { type: 'string' },
+        prepTime: { type: 'string' },
+        cookTime: { type: 'string' },
+        servings: { type: 'number' },
+        calories: { type: 'number' },
+        ingredients: { type: 'string' },
+        steps: { type: 'string' },
+
+        image: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
+  @UseInterceptors(
+    FileInterceptor('image'),
+  )
   async updateRecipe(
     @Req() req: any,
 
     @Param('id') id: string,
 
-    @Body() dto: UpdateRecipeDto,
+    @Body() dto: any,
+
+    @UploadedFile()
+    file: any,
   ) {
 
     if (req.user.role !== 'ADMIN') {
@@ -173,10 +201,21 @@ export class RecipesController {
       );
     }
 
-    const recipe = await this.recipesService.update(
-      Number(id),
-      dto,
-    );
+    if (file) {
+
+      const uploaded: any =
+        await this.cloudinaryService
+          .uploadImage(file);
+
+      dto.imageUrl =
+        uploaded.secure_url;
+    }
+
+    const recipe =
+      await this.recipesService.update(
+        Number(id),
+        dto,
+      );
 
     return {
       message: 'Update recipe success',
@@ -187,16 +226,16 @@ export class RecipesController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiBody({
-  schema: {
-    type: 'object',
-    properties: {
-      status: {
-        type: 'string',
-        enum: ['APPROVED', 'REJECTED'],
+    schema: {
+      type: 'object',
+      properties: {
+        status: {
+          type: 'string',
+          enum: ['APPROVED', 'REJECTED'],
+        },
       },
     },
-  },
-})
+  })
 
   @Patch(':id/verify')
   async verifyRecipe(
@@ -362,17 +401,17 @@ export class RecipesController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('multipart/form-data')
-@ApiBody({
-  schema: {
-    type: 'object',
-    properties: {
-      image: {
-        type: 'string',
-        format: 'binary',
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: {
+          type: 'string',
+          format: 'binary',
+        },
       },
     },
-  },
-})
+  })
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('image'),

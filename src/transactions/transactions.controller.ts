@@ -6,6 +6,7 @@ import {
   Req,
   UseGuards,
   Patch,
+  Body,
     ForbiddenException,
 } from '@nestjs/common';
 import { Res } from '@nestjs/common';
@@ -16,6 +17,8 @@ import {UploadedFile, UseInterceptors,} from '@nestjs/common';
 import { FileInterceptor }from '@nestjs/platform-express';
 import { CloudinaryService }from 'src/cloudinary/cloudinary.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, } from '@nestjs/swagger';
+import { VerifyTransactionDto } from './dto/verify-transaction.dto';
 
 
 
@@ -29,8 +32,22 @@ export class TransactionsController {
     CloudinaryService,
   ) {}
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+ @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+
+@ApiConsumes('multipart/form-data')
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      paymentProof: {
+        type: 'string',
+        format: 'binary',
+      },
+    },
+  },
+})
+
 @Post(':tutorialId')
 @UseInterceptors(
   FileInterceptor('paymentProof'),
@@ -43,10 +60,7 @@ async createTransaction(
 
   @UploadedFile()
   file: any,
-
-  
-)
- {
+) {
   let paymentProof: string | null =
     null;
 
@@ -132,6 +146,8 @@ async verifyTransaction(
   @Req() req: any,
 
   @Param('id') id: string,
+
+  @Body() dto: VerifyTransactionDto,
 ) {
 
   if (req.user.role !== 'ADMIN') {
@@ -141,17 +157,14 @@ async verifyTransaction(
   }
 
   const transaction =
-    await this.transactionsService
-      .verifyTransaction(
-        Number(id),
-      );
+    await this.transactionsService.verifyTransaction(
+      Number(id),
+      dto.status,
+    );
 
   return {
     success: true,
-
-    message:
-      'Transaction verified successfully',
-
+    message: 'Transaction verified successfully',
     transaction,
   };
 }
