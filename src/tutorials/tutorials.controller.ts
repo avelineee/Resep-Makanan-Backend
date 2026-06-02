@@ -36,6 +36,12 @@ export class TutorialsController {
   schema: {
     type: 'object',
     properties: {
+
+      recipeId: {
+        type: 'number',
+        example: 1,
+      },
+
       title: {
         type: 'string',
       },
@@ -52,14 +58,14 @@ export class TutorialsController {
         type: 'string',
       },
 
-      video: {
-        type: 'string',
-        format: 'binary',
+      duration: {
+        type: 'number',
+        example: 600,
       },
 
-      thumbnail: {
-        type: 'string',
-        format: 'binary',
+      price: {
+        type: 'number',
+        example: 25000,
       },
     },
   },
@@ -156,34 +162,7 @@ async updateTutorial(
   schema: {
     type: 'object',
     properties: {
-
-      recipeId: {
-        type: 'number',
-        example: 1,
-      },
-
-      title: {
-        type: 'string',
-      },
-
-      description: {
-        type: 'string',
-      },
-
-      videoUrl: {
-        type: 'string',
-      },
-
-      thumbnailUrl: {
-        type: 'string',
-      },
-
       video: {
-        type: 'string',
-        format: 'binary',
-      },
-
-      thumbnail: {
         type: 'string',
         format: 'binary',
       },

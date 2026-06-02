@@ -1,8 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
+import { IsInt } from 'class-validator';
 
 export class CreateTutorialDto {
-  @ApiProperty({
+  @IsInt()
+recipeId!: number;
+  
+    @ApiProperty({
     example: 'Cara Membuat Nasi Goreng',
   })
   @IsString()
@@ -29,4 +33,20 @@ export class CreateTutorialDto {
   @IsOptional()
   @IsString()
   thumbnailUrl?: string;
+
+  @ApiProperty({
+  example: 1,
+})
+
+@ApiProperty({
+  example: 600,
+})
+@IsInt()
+duration!: number;
+
+@ApiProperty({
+  example: 25000,
+})
+@IsInt()
+price!: number;
 }
