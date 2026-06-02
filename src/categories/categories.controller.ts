@@ -1,6 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import {Body,  Get, Post} from '@nestjs/common';
+import { CreateCategoryDto } from './dto/create-category.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -10,24 +11,18 @@ export class CategoriesController {
   ) {}
 
   @Post()
-  async createCategory(
-    @Body() body: any,
-  ) {
+async createCategory(
+  @Body() dto: CreateCategoryDto,
+) {
+  const category =
+    await this.categoriesService.create(dto);
 
-    const category =
-      await this.categoriesService.create(
-        body,
-      );
-
-    return {
-      success: true,
-
-      message:
-        'Category created successfully',
-
-      category,
-    };
-  }
+  return {
+    success: true,
+    message: 'Category created successfully',
+    category,
+  };
+}
 
   @Get()
   async getCategories() {
