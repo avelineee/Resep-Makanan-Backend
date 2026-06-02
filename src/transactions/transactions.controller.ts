@@ -181,6 +181,7 @@ async getTransactionSummary(
     );
 }
 
+@ApiBearerAuth()
 @Get('download-history')
 @UseGuards(JwtAuthGuard)
 async downloadHistory(

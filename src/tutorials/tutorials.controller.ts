@@ -87,6 +87,7 @@ async createTutorial(
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
 @Patch(':id')
 async updateTutorial(
