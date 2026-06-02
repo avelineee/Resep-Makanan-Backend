@@ -16,6 +16,8 @@ import { UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import {ApiBody, ApiConsumes,
+} from '@nestjs/swagger';
 
 @Controller('users')
 export class UsersController {
@@ -111,21 +113,37 @@ async removeFavorite(
     };
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  
+  
+ @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+
+@ApiConsumes('multipart/form-data')
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      username: {
+        type: 'string',
+      },
+      email: {
+        type: 'string',
+      },
+      image: {
+        type: 'string',
+        format: 'binary',
+      },
+    },
+  },
+})
+
 @Patch(':id')
-@UseInterceptors(
-  FileInterceptor('image'),
-)
+@UseInterceptors(FileInterceptor('image'))
 async updateUser(
   @Req() req: any,
-
   @Param('id') id: string,
-
   @Body() body: any,
-
-  @UploadedFile()
-  file: any,
+  @UploadedFile() file: any,
 ) {
 
   const targetUserId =
