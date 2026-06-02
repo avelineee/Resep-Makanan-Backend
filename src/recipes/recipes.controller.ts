@@ -24,6 +24,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { AnyNaptrRecord } from 'dns';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiBody, ApiConsumes,} from '@nestjs/swagger';
+
 
 
 
@@ -73,27 +76,63 @@ export class RecipesController {
     };
   }
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Post()
-  async createRecipe(
-    @Req() req: any,
-    @Body() dto: CreateRecipeDto,
-  ) {
-    // Normal users create PENDING recipes, Admins create APPROVED recipes (or custom)
-    const status = 
-    req.user.role === 'ADMIN' ? 'APPROVED' : 'PENDING';
-    
-    const recipe = await this.recipesService.create({
+@UseGuards(JwtAuthGuard)
+
+@ApiConsumes('multipart/form-data')
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      title: { type: 'string' },
+      description: { type: 'string' },
+      category: { type: 'string' },
+      prepTime: { type: 'string' },
+      cookTime: { type: 'string' },
+      servings: { type: 'number' },
+      calories: { type: 'number' },
+
+      image: {
+        type: 'string',
+        format: 'binary',
+      },
+    },
+  },
+})
+
+@UseInterceptors(FileInterceptor('image'))
+@Post()
+async createRecipe(
+  @Req() req: any,
+  @Body() dto: CreateRecipeDto,
+  @UploadedFile() file?: Express.Multer.File,
+) {
+  const status =
+    req.user.role === 'ADMIN'
+      ? 'APPROVED'
+      : 'PENDING';
+
+  let imageUrl: string | undefined;
+
+  if (file) {
+    const uploaded: any =
+      await this.cloudinaryService.uploadImage(file);
+
+    imageUrl = uploaded.secure_url;
+  }
+
+  const recipe =
+    await this.recipesService.create({
       ...dto,
+      imageUrl,
       status,
-      authorId: req.user.id
+      authorId: req.user.id,
     });
 
-    return {
-      message: 'Create recipe success',
-      recipe,
-    };
-  }
+  return {
+    message: 'Create recipe success',
+    recipe,
+  };
+}
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
