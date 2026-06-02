@@ -39,8 +39,8 @@ export class RecipesService {
             }
             : {},
 
-          status === 'ALL' 
-            ? {} 
+          status === 'ALL'
+            ? {}
             : { status: (status as any) || 'APPROVED' }
         ],
       },
@@ -50,7 +50,7 @@ export class RecipesService {
 
         stepItems: true,
 
-         tags: true,
+        tags: true,
 
         _count: {
           select: {
@@ -115,7 +115,7 @@ export class RecipesService {
           data.steps,
         ),
 
-        ...(data.categoryIds && {
+        ...(data.categoryIds?.length && {
           categories: {
             create: data.categoryIds.map(
               (categoryId: number) => ({
@@ -126,17 +126,14 @@ export class RecipesService {
         }),
 
         ingredientItems: {
-          create: data.ingredients,
+          create: data.ingredients || [],
         },
 
         stepItems: {
-          create: data.steps.map(
+          create: (data.steps || []).map(
             (step: any) => ({
-              stepNumber:
-                step.stepNumber,
-
-              description:
-                step.description,
+              stepNumber: step.stepNumber,
+              description: step.description,
             }),
           ),
         },
@@ -147,7 +144,7 @@ export class RecipesService {
 
         stepItems: true,
 
-          tags: true,
+        tags: true,
       },
     });
   }
@@ -239,7 +236,7 @@ export class RecipesService {
 
         stepItems: true,
 
-          tags: true,
+        tags: true,
       },
     });
   }
@@ -281,7 +278,7 @@ export class RecipesService {
 
           stepItems: true,
 
-           tags: true,
+          tags: true,
 
           author: { select: { username: true } },
 
@@ -289,7 +286,7 @@ export class RecipesService {
             include: {
               category: true,
 
-              
+
             },
           },
 
