@@ -15,7 +15,7 @@ import { JwtAuthGuard }from 'src/auth/guards/jwt-auth.guard';
 import {UploadedFile, UseInterceptors,} from '@nestjs/common';
 import { FileInterceptor }from '@nestjs/platform-express';
 import { CloudinaryService }from 'src/cloudinary/cloudinary.service';
-
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 
 
@@ -29,6 +29,7 @@ export class TransactionsController {
     CloudinaryService,
   ) {}
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
 @Post(':tutorialId')
 @UseInterceptors(
@@ -46,12 +47,6 @@ async createTransaction(
   
 )
  {
-  console.log('MASUK ENDPOINT');
-console.log('FILE =', file);
-console.log('USER =', req.user);
-console.log('TUTORIAL ID =', tutorialId);
-  
-
   let paymentProof: string | null =
     null;
 
@@ -82,6 +77,7 @@ console.log('TUTORIAL ID =', tutorialId);
   };
 }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMyTransactions(
@@ -107,6 +103,7 @@ console.log('TUTORIAL ID =', tutorialId);
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get()
   async getAllTransactions(
@@ -127,6 +124,8 @@ console.log('TUTORIAL ID =', tutorialId);
       transactions,
     };
   }
+
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
 @Patch(':id/verify')
 async verifyTransaction(
@@ -157,6 +156,7 @@ async verifyTransaction(
   };
 }
 
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Get('summary')
 async getTransactionSummary(

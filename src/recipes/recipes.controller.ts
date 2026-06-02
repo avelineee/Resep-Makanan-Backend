@@ -23,6 +23,7 @@ import { UploadedFile, UseInterceptors, } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { AnyNaptrRecord } from 'dns';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 
 @Controller('recipes')
@@ -70,7 +71,7 @@ export class RecipesController {
       recipes,
     };
   }
-
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post()
   async createRecipe(
@@ -91,6 +92,8 @@ export class RecipesController {
       recipe,
     };
   }
+
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async updateRecipe(
@@ -118,6 +121,7 @@ export class RecipesController {
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':id/verify')
   async verifyRecipe(
@@ -136,6 +140,7 @@ export class RecipesController {
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async deleteRecipe(
@@ -157,6 +162,7 @@ export class RecipesController {
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post(':id/reviews')
   async createReview(
@@ -204,6 +210,7 @@ export class RecipesController {
       reviews,
     };
   }
+  @ApiBearerAuth()  
   @UseGuards(JwtAuthGuard)
   @Delete(':id/reviews')
   async deleteReview(
@@ -253,6 +260,7 @@ export class RecipesController {
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getRecipeDetail(
@@ -275,6 +283,8 @@ export class RecipesController {
       recipe,
     };
   }
+
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post('upload')
   @UseInterceptors(

@@ -5,10 +5,12 @@ import { UseGuards } from '@nestjs/common';
 import { Body, Req, Post, Param, Get, Delete } from '@nestjs/common';
 import { CreateJournalDto } from './dto/create-journal.dto';
 import { CreateEntryDto } from './dto/create-entry.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('journals')
 export class JournalController {
   constructor(private journalService: JournalService) {}
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post()
   async createJournal(
@@ -59,6 +61,8 @@ async addEntry(
     entry,
   };
 }
+
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Get('me')
 async getMyJournals(
@@ -81,6 +85,8 @@ async getMyJournals(
     journals,
   };
 }
+
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Delete('entries/:entryId')
 async deleteEntry(
@@ -101,6 +107,8 @@ async deleteEntry(
       'Journal entry has been deleted successfully',
   };
 }
+
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Get('shopping-list')
 async getShoppingList(

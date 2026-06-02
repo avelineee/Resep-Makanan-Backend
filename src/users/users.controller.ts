@@ -15,11 +15,13 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService, private cloudinaryService: CloudinaryService) {}
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get()
   async getAllUsers(@Req() req: any) {
@@ -37,6 +39,8 @@ export class UsersController {
       users,
     };
   }
+
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
 @Post('me/favorites/:recipeId')
 async addFavorite(
@@ -56,6 +60,8 @@ async addFavorite(
     favorite,
   };
 }
+
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Get('me/favorites')
 async getFavorites(@Req() req: any) {
@@ -73,6 +79,7 @@ async getFavorites(@Req() req: any) {
   favorites,
 };
 }
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Delete('me/favorites/:recipeId')
 async removeFavorite(
@@ -91,6 +98,7 @@ async removeFavorite(
   };
 }
 
+@ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('me/reviews')
   async getReviews(@Req() req: any) {
@@ -103,6 +111,7 @@ async removeFavorite(
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
 @Patch(':id')
 @UseInterceptors(

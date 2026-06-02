@@ -16,6 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { TutorialsService } from './tutorials.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('tutorials')
 export class TutorialsController {
@@ -57,6 +58,7 @@ export class TutorialsController {
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get(':id/watch')
   async watchTutorial(
@@ -85,6 +87,7 @@ export class TutorialsController {
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async deleteTutorial(
@@ -99,6 +102,7 @@ export class TutorialsController {
 
   // ── Upload endpoints ────────────────────────────────────────
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post('upload/video')
   @UseInterceptors(FileInterceptor('video'))
@@ -115,6 +119,7 @@ export class TutorialsController {
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post('upload/thumbnail')
   @UseInterceptors(FileInterceptor('thumbnail'))
