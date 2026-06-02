@@ -283,6 +283,8 @@ export class RecipesService {
 
            tags: true,
 
+          author: { select: { username: true } },
+
           categories: {
             include: {
               category: true,
