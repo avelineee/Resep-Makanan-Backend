@@ -35,6 +35,7 @@ export class JournalController {
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
 @Post(':journalId/entries')
 async addEntry(
