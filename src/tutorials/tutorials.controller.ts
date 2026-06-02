@@ -75,6 +75,8 @@ export class TutorialsController {
 async createTutorial(
   @Body() body: any,
 ) {
+   console.log('BODY = ', body);
+   
   const tutorial =
     await this.tutorialsService.create(body);
 
