@@ -25,7 +25,8 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { AnyNaptrRecord } from 'dns';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import {
-  ApiBody, ApiConsumes,} from '@nestjs/swagger';
+  ApiBody, ApiConsumes,
+} from '@nestjs/swagger';
 
 
 
@@ -76,63 +77,81 @@ export class RecipesController {
     };
   }
   @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
 
-@ApiConsumes('multipart/form-data')
-@ApiBody({
-  schema: {
-    type: 'object',
-    properties: {
-      title: { type: 'string' },
-      description: { type: 'string' },
-      category: { type: 'string' },
-      prepTime: { type: 'string' },
-      cookTime: { type: 'string' },
-      servings: { type: 'number' },
-      calories: { type: 'number' },
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        description: { type: 'string' },
+        category: { type: 'string' },
+        prepTime: { type: 'string' },
+        cookTime: { type: 'string' },
+        servings: { type: 'number' },
+        calories: { type: 'number' },
+        ingredients: {
+          type: 'string',
+          example:
+            '[{"name":"Mie","amount":"200 gram"}]',
+        },
 
-      image: {
-        type: 'string',
-        format: 'binary',
+        steps: {
+          type: 'string',
+          example:
+            '[{"stepNumber":1,"description":"Rebus mie"}]',
+        },
+
+        image: {
+          type: 'string',
+          format: 'binary',
+        },
       },
     },
-  },
-})
+  })
 
-@UseInterceptors(FileInterceptor('image'))
-@Post()
-async createRecipe(
-  @Req() req: any,
-  @Body() dto: CreateRecipeDto,
-  @UploadedFile() file?: Express.Multer.File,
-) {
-  const status =
-    req.user.role === 'ADMIN'
-      ? 'APPROVED'
-      : 'PENDING';
+  @UseInterceptors(FileInterceptor('image'))
+  @Post()
+  async createRecipe(
+    @Req() req: any,
+    @Body() dto: CreateRecipeDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const status =
+      req.user.role === 'ADMIN'
+        ? 'APPROVED'
+        : 'PENDING';
 
-  let imageUrl: string | undefined;
+    let imageUrl: string | undefined;
 
-  if (file) {
-    const uploaded: any =
-      await this.cloudinaryService.uploadImage(file);
+    if (file) {
+      const uploaded: any =
+        await this.cloudinaryService.uploadImage(file);
 
-    imageUrl = uploaded.secure_url;
+      imageUrl = uploaded.secure_url;
+    }
+    if (dto.ingredients) {
+      dto.ingredients = JSON.parse(dto.ingredients as any);
+    }
+
+    if (dto.steps) {
+      dto.steps = JSON.parse(dto.steps as any);
+    }
+
+    const recipe =
+      await this.recipesService.create({
+        ...dto,
+        imageUrl,
+        status,
+        authorId: req.user.id,
+      });
+
+    return {
+      message: 'Create recipe success',
+      recipe,
+    };
   }
-
-  const recipe =
-    await this.recipesService.create({
-      ...dto,
-      imageUrl,
-      status,
-      authorId: req.user.id,
-    });
-
-  return {
-    message: 'Create recipe success',
-    recipe,
-  };
-}
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
@@ -251,7 +270,7 @@ async createRecipe(
       reviews,
     };
   }
-  @ApiBearerAuth()  
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':id/reviews')
   async deleteReview(
