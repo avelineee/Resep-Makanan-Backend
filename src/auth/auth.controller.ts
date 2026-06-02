@@ -27,10 +27,11 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   
   @Get('me')
-  getProfile(@Req() req: any) {
+  async getProfile(@Req() req: any) {
+    const user = await this.authService.getProfile(req.user.email);
     return {
       message: 'Get profile success',
-      user: req.user,
+      user,
     };
   }
 }
