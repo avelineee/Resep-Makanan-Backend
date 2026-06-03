@@ -195,7 +195,7 @@ export class RecipesService {
           data.steps,
         ),
 
-        ...(data.ingredients && {
+        ...(Array.isArray(data.ingredients) && {
           ingredientItems: {
             deleteMany: {},
 
@@ -203,7 +203,7 @@ export class RecipesService {
           },
         }),
 
-        ...(data.steps && {
+        ...(Array.isArray(data.steps) && {
           stepItems: {
             deleteMany: {},
 

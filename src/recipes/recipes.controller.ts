@@ -211,7 +211,29 @@ export class RecipesController {
         uploaded.secure_url;
     }
 
+    if (dto.ingredients === '') {
+      delete dto.ingredients;
+    }
+
+    if (dto.steps === '') {
+      delete dto.steps;
+    }
+
+    if (
+      dto.ingredients &&
+      typeof dto.ingredients === 'string'
+    ) {
+      dto.ingredients = JSON.parse(dto.ingredients);
+    }
+
+    if (
+      dto.steps &&
+      typeof dto.steps === 'string'
+    ) {
+      dto.steps = JSON.parse(dto.steps);
+    }
     const recipe =
+
       await this.recipesService.update(
         Number(id),
         dto,
