@@ -131,11 +131,11 @@ export class RecipesController {
 
       imageUrl = uploaded.secure_url;
     }
-    if (dto.ingredients) {
+    if (dto.ingredients && typeof dto.ingredients === 'string') {
       dto.ingredients = JSON.parse(dto.ingredients as any);
     }
 
-    if (dto.steps) {
+    if (dto.steps && typeof dto.steps === 'string') {
       dto.steps = JSON.parse(dto.steps as any);
     }
     dto.servings = Number(dto.servings);
