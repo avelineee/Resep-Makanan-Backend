@@ -92,8 +92,9 @@ export class TransactionsService {
   }
  async verifyTransaction(
   id: number,
-  status: 'SUCCESS' | 'FAILED',
+  status?: 'SUCCESS' | 'FAILED',
 ) {
+  const targetStatus = (status === 'SUCCESS' || status === 'FAILED') ? status : 'SUCCESS';
 
   const transaction =
     await this.prisma.transaction.findUnique({
@@ -108,37 +109,50 @@ export class TransactionsService {
     );
   }
 
+  // If transaction is already in the target status, just return it
+  if (transaction.status === targetStatus) {
+    return transaction;
+  }
+
   const updatedTransaction =
   await this.prisma.transaction.update({
     where: {
       id,
     },
     data: {
-      status,
+      status: targetStatus,
     },
   });
 
-if (status === 'SUCCESS') {
-
-  await this.prisma.userTutorialAccess.create({
-    data: {
+if (targetStatus === 'SUCCESS') {
+  // Check if the user already has access to this tutorial to avoid @@unique([userId, tutorialId]) violation
+  const existingAccess = await this.prisma.userTutorialAccess.findFirst({
+    where: {
       userId: transaction.userId,
       tutorialId: transaction.tutorialId,
-      transactionId: transaction.id,
     },
   });
 
-  await this.prisma.activity.create({
-    data: {
-      userId: transaction.userId,
-      type: 'TUTORIAL_PURCHASED',
-      metadata: {
+  if (!existingAccess) {
+    await this.prisma.userTutorialAccess.create({
+      data: {
+        userId: transaction.userId,
         tutorialId: transaction.tutorialId,
         transactionId: transaction.id,
       },
-    },
-  });
+    });
 
+    await this.prisma.activity.create({
+      data: {
+        userId: transaction.userId,
+        type: 'TUTORIAL_PURCHASED',
+        metadata: {
+          tutorialId: transaction.tutorialId,
+          transactionId: transaction.id,
+        },
+      },
+    });
+  }
 }
 
 return updatedTransaction;
