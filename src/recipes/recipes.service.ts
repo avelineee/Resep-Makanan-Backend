@@ -171,29 +171,45 @@ export class RecipesService {
       },
 
       data: {
-        title: data.title,
+        ...(data.title !== undefined && {
+          title: data.title,
+        }),
 
-        description: data.description,
+        ...(data.description !== undefined && {
+          description: data.description,
+        }),
 
-        imageUrl: data.imageUrl,
+        ...(data.imageUrl !== undefined && {
+          imageUrl: data.imageUrl,
+        }),
 
-        category: data.category,
+        ...(data.category !== undefined && {
+          category: data.category,
+        }),
 
-        prepTime: data.prepTime,
+        ...(data.prepTime !== undefined && {
+          prepTime: data.prepTime,
+        }),
 
-        cookTime: data.cookTime,
+        ...(data.cookTime !== undefined && {
+          cookTime: data.cookTime,
+        }),
 
-        servings: data.servings,
+        ...(data.servings !== undefined && {
+          servings: Number(data.servings),
+        }),
 
-        calories: data.calories,
+        ...(data.calories !== undefined && {
+          calories: Number(data.calories),
+        }),
 
-        ingredients: JSON.stringify(
-          data.ingredients,
-        ),
+        ...(data.ingredients !== undefined && {
+          ingredients: JSON.stringify(data.ingredients),
+        }),
 
-        steps: JSON.stringify(
-          data.steps,
-        ),
+        ...(data.steps !== undefined && {
+          steps: JSON.stringify(data.steps),
+        }),
 
         ...(Array.isArray(data.ingredients) && {
           ingredientItems: {
